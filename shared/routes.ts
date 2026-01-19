@@ -16,6 +16,13 @@ export const errorSchemas = {
 
 export const api = {
   appointments: {
+    calendarInfo: {
+      method: 'GET' as const,
+      path: '/api/calendar/info',
+      responses: {
+        200: z.object({ summary: z.string().nullable() }),
+      },
+    },
     list: {
       method: 'GET' as const,
       path: '/api/appointments',

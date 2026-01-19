@@ -3,11 +3,7 @@ import { google } from 'googleapis';
 
 let connectionSettings: any;
 
-async function getAccessToken() {
-  if (connectionSettings && connectionSettings.settings.expires_at && new Date(connectionSettings.settings.expires_at).getTime() > Date.now()) {
-    return connectionSettings.settings.access_token;
-  }
-  
+async function getConnectionSettings() {
   const hostname = process.env.REPLIT_CONNECTORS_HOSTNAME
   const xReplitToken = process.env.REPL_IDENTITY 
     ? 'repl ' + process.env.REPL_IDENTITY 
@@ -19,7 +15,7 @@ async function getAccessToken() {
     throw new Error('X_REPLIT_TOKEN not found for repl/depl');
   }
 
-  connectionSettings = await fetch(
+  const response = await fetch(
     'https://' + hostname + '/api/v2/connection?include_secrets=true&connector_names=google-calendar',
     {
       headers: {
@@ -27,7 +23,17 @@ async function getAccessToken() {
         'X_REPLIT_TOKEN': xReplitToken
       }
     }
-  ).then(res => res.json()).then(data => data.items?.[0]);
+  ).then(res => res.json());
+  
+  return response.items?.[0];
+}
+
+async function getAccessToken() {
+  if (connectionSettings && connectionSettings.settings.expires_at && new Date(connectionSettings.settings.expires_at).getTime() > Date.now()) {
+    return connectionSettings.settings.access_token;
+  }
+  
+  connectionSettings = await getConnectionSettings();
 
   const accessToken = connectionSettings?.settings?.access_token || connectionSettings.settings?.oauth?.credentials?.access_token;
 
@@ -49,6 +55,17 @@ export async function getUncachableGoogleCalendarClient() {
   });
 
   return google.calendar({ version: 'v3', auth: oauth2Client });
+}
+
+export async function getSyncedCalendarInfo() {
+  try {
+    const calendar = await getUncachableGoogleCalendarClient();
+    const response = await calendar.calendars.get({ calendarId: 'primary' });
+    return response.data.summary;
+  } catch (error) {
+    console.error('Error fetching calendar info:', error);
+    return null;
+  }
 }
 
 export async function createCalendarEvent(appointment: any) {

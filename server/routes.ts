@@ -5,12 +5,21 @@ import { api } from "@shared/routes";
 import { z } from "zod";
 import { TIME_SLOTS } from "@shared/schema";
 
-import { createCalendarEvent } from "./google-calendar";
+import { createCalendarEvent, getSyncedCalendarInfo } from "./google-calendar";
 
 export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
+
+  app.get("/api/calendar/info", async (_req, res) => {
+    try {
+      const summary = await getSyncedCalendarInfo();
+      res.json({ summary });
+    } catch (err) {
+      res.status(500).json({ message: "Failed to fetch calendar info" });
+    }
+  });
 
   app.get(api.appointments.list.path, async (req, res) => {
     try {
