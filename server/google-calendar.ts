@@ -1,6 +1,8 @@
 
 import { google } from 'googleapis';
 
+const CALENDAR_ID = 'de43e8a726b5cbbd1c985cc89093f02ac1df504f0896b55b8bba74610b259d4e@group.calendar.google.com';
+
 let connectionSettings: any;
 
 async function getConnectionSettings() {
@@ -54,33 +56,11 @@ export async function getUncachableGoogleCalendarClient() {
   return google.calendar({ version: 'v3', auth: oauth2Client });
 }
 
-export async function deleteBrendasCalendar() {
-  try {
-    const calendar = await getUncachableGoogleCalendarClient();
-    const list = await calendar.calendarList.list();
-    
-    const brendasCalendar = list.data.items?.find(c => c.summary === "Brenda's Calendar");
-    if (brendasCalendar && brendasCalendar.id) {
-      await calendar.calendars.delete({ calendarId: brendasCalendar.id });
-      return true;
-    }
-    return false;
-  } catch (error) {
-    console.error('Error deleting Brenda\'s Calendar:', error);
-    return false;
-  }
-}
-
 export async function getSyncedCalendarInfo() {
   try {
     const calendar = await getUncachableGoogleCalendarClient();
-    const list = await calendar.calendarList.list();
-    const brendasCalendar = list.data.items?.find(c => c.summary === "Brenda's Calendar");
-    
-    if (brendasCalendar) return brendasCalendar.summary;
-    
-    const primary = await calendar.calendars.get({ calendarId: 'primary' });
-    return primary.data.summary;
+    const response = await calendar.calendars.get({ calendarId: CALENDAR_ID });
+    return response.data.summary;
   } catch (error) {
     console.error('Error fetching calendar info:', error);
     return null;
@@ -90,14 +70,6 @@ export async function getSyncedCalendarInfo() {
 export async function createCalendarEvent(appointment: any) {
   try {
     const calendar = await getUncachableGoogleCalendarClient();
-    
-    // Default to primary if Brenda's is gone
-    let calendarId = 'primary';
-    const list = await calendar.calendarList.list();
-    const brendasCalendar = list.data.items?.find(c => c.summary === "Brenda's Calendar");
-    if (brendasCalendar && brendasCalendar.id) {
-      calendarId = brendasCalendar.id;
-    }
     
     const startDateTime = new Date(`${appointment.date}T${appointment.time}:00`);
     const endDateTime = new Date(startDateTime.getTime() + 20 * 60000);
@@ -114,7 +86,7 @@ export async function createCalendarEvent(appointment: any) {
     };
 
     const response = await calendar.events.insert({
-      calendarId: calendarId,
+      calendarId: CALENDAR_ID,
       requestBody: event,
     });
 

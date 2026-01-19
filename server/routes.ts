@@ -5,7 +5,7 @@ import { api } from "@shared/routes";
 import { z } from "zod";
 import { TIME_SLOTS } from "@shared/schema";
 
-import { createCalendarEvent, getSyncedCalendarInfo, deleteBrendasCalendar } from "./google-calendar";
+import { createCalendarEvent, getSyncedCalendarInfo } from "./google-calendar";
 
 export async function registerRoutes(
   httpServer: Server,
@@ -13,16 +13,7 @@ export async function registerRoutes(
 ): Promise<Server> {
 
   app.post("/api/calendar/delete-brendas", async (_req, res) => {
-    try {
-      const deleted = await deleteBrendasCalendar();
-      if (deleted) {
-        res.json({ message: "Brenda's Calendar deleted successfully" });
-      } else {
-        res.status(404).json({ message: "Brenda's Calendar not found" });
-      }
-    } catch (err) {
-      res.status(500).json({ message: "Failed to delete calendar" });
-    }
+    res.status(410).json({ message: "This operation is no longer supported with fixed calendar ID" });
   });
 
   app.get("/api/calendar/info", async (_req, res) => {
