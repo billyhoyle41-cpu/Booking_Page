@@ -1,0 +1,83 @@
+{
+  "colorScheme": "light",
+  "fonts": [
+    {
+      "family": "sans-serif",
+      "count": 39
+    },
+    {
+      "family": "Inter",
+      "count": 26
+    },
+    {
+      "family": "Montserrat",
+      "count": 13
+    }
+  ],
+  "colors": {
+    "primary": "#CF2029",
+    "accent": "#192D5D",
+    "background": "#F8F8F6",
+    "textPrimary": "#192D5D",
+    "link": "#192D5D"
+  },
+  "typography": {
+    "fontFamilies": {
+      "primary": "Inter",
+      "heading": "Montserrat"
+    },
+    "fontStacks": {
+      "body": [
+        "Inter",
+        "sans-serif"
+      ],
+      "heading": [
+        "Montserrat",
+        "sans-serif"
+      ],
+      "paragraph": [
+        "Inter",
+        "sans-serif"
+      ]
+    },
+    "fontSizes": {
+      "h1": "128px",
+      "h2": "72px",
+      "body": "20px"
+    }
+  },
+  "spacing": {
+    "baseUnit": 8,
+    "borderRadius": "0px"
+  },
+  "components": {},
+  "images": {
+    "logo": "https://family-cuts--billyhoyle41.replit.app/assets/Outside_3_1768356966132-DqJL3ZU7.png",
+    "favicon": "https://family-cuts--billyhoyle41.replit.app/favicon.png",
+    "ogImage": "https://family-cuts--billyhoyle41.replit.app/opengraph.jpg"
+  },
+  "__framework_hints": [],
+  "__llm_logo_reasoning": {
+    "selectedIndex": 0,
+    "reasoning": "Strong indicators: header logo linking to homepage, header location, visible, top-left position, highest logo on page, alt matches logo/brand, reasonable size. Score: 120 (clear winner by 120 points)",
+    "confidence": 0.9
+  },
+  "__llm_button_reasoning": {
+    "primary": {
+      "index": -1,
+      "text": "N/A",
+      "reasoning": "LLM failed"
+    },
+    "secondary": {
+      "index": -1,
+      "text": "N/A",
+      "reasoning": "LLM failed"
+    },
+    "confidence": 0
+  },
+  "confidence": {
+    "buttons": 0,
+    "colors": 0,
+    "overall": 0
+  }
+}

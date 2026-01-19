@@ -93,27 +93,27 @@ export default function DailyView() {
   const displayDate = format(currentDate, "EEEE, MMMM do");
 
   return (
-    <div className="min-h-screen warm-gradient">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-white/80 backdrop-blur-sm border-b border-border sticky top-0 z-20">
+      <header className="bg-accent text-accent-foreground sticky top-0 z-20">
         <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
+              <div className="w-10 h-10 bg-primary flex items-center justify-center">
                 <Scissors className="w-5 h-5 text-primary-foreground" />
               </div>
               <div>
-                <h1 className="text-xl font-display font-semibold text-foreground">
+                <h1 className="text-xl font-display font-bold text-white uppercase tracking-wide">
                   The Family Barbershop
                 </h1>
-                <p className="text-sm text-muted-foreground">Appointment Book</p>
+                <p className="text-sm text-white/70">Appointment Book</p>
               </div>
             </div>
             
             <button
               onClick={() => syncMutation.mutate()}
               disabled={syncMutation.isPending}
-              className="flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground rounded-lg transition-colors hover-elevate"
+              className="flex items-center gap-2 px-3 py-2 text-sm text-white/80 transition-colors hover-elevate"
               title="Sync from Google Calendar"
               data-testid="button-sync-calendar"
             >
@@ -126,11 +126,11 @@ export default function DailyView() {
 
       <main className="max-w-4xl mx-auto px-4 py-6">
         {/* Date Navigation */}
-        <div className="bg-white rounded-xl card-shadow p-4 mb-6">
-          <div className="flex items-center justify-between">
+        <div className="bg-white card-shadow p-4 mb-6">
+          <div className="flex items-center justify-between gap-2">
             <button 
               onClick={handlePrevDay}
-              className="p-2 rounded-lg text-muted-foreground transition-colors hover-elevate"
+              className="p-2 text-muted-foreground transition-colors hover-elevate"
               aria-label="Previous day"
               data-testid="button-prev-day"
             >
@@ -141,11 +141,11 @@ export default function DailyView() {
               <Popover>
                 <PopoverTrigger asChild>
                   <button 
-                    className="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors hover-elevate"
+                    className="flex items-center gap-2 px-4 py-2 transition-colors hover-elevate"
                     data-testid="button-date-picker"
                   >
-                    <CalendarIcon className="w-5 h-5 text-accent" />
-                    <span className="font-display text-lg font-medium text-foreground">
+                    <CalendarIcon className="w-5 h-5 text-primary" />
+                    <span className="font-display text-lg font-bold text-foreground uppercase">
                       {displayDate}
                     </span>
                   </button>
@@ -161,7 +161,7 @@ export default function DailyView() {
               </Popover>
               
               {isToday(currentDate) && (
-                <span className="px-3 py-1 bg-accent/10 text-accent text-xs font-semibold rounded-full uppercase tracking-wide">
+                <span className="px-3 py-1 bg-primary text-primary-foreground text-xs font-bold uppercase tracking-wide">
                   Today
                 </span>
               )}
@@ -169,7 +169,7 @@ export default function DailyView() {
 
             <button 
               onClick={handleNextDay}
-              className="p-2 rounded-lg text-muted-foreground transition-colors hover-elevate"
+              className="p-2 text-muted-foreground transition-colors hover-elevate"
               aria-label="Next day"
               data-testid="button-next-day"
             >
@@ -182,7 +182,7 @@ export default function DailyView() {
         {isLoading && (
           <div className="flex items-center justify-center py-20">
             <div className="flex flex-col items-center gap-3">
-              <div className="w-10 h-10 border-4 border-accent/20 border-t-accent rounded-full animate-spin" />
+              <div className="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
               <p className="text-muted-foreground">Loading appointments...</p>
             </div>
           </div>
@@ -206,8 +206,8 @@ export default function DailyView() {
                     /* Booked Slot */
                     <div 
                       className={cn(
-                        "bg-white rounded-xl card-shadow p-4 transition-all hover:card-shadow-hover cursor-pointer group",
-                        appointment.isCompleted && "opacity-60"
+                        "bg-white card-shadow p-4 transition-all hover:card-shadow-hover cursor-pointer group border-l-4 border-l-primary",
+                        appointment.isCompleted && "opacity-60 border-l-muted"
                       )}
                       onClick={() => handleSlotClick(time, appointment)}
                       data-testid={`slot-appointment-${appointment.id}`}
@@ -216,7 +216,7 @@ export default function DailyView() {
                         <div className="flex items-start gap-4">
                           {/* Time */}
                           <div className="flex flex-col items-center min-w-[70px]">
-                            <span className="text-sm font-medium text-accent">
+                            <span className="text-sm font-bold text-primary">
                               {formatTimeAmPm(time)}
                             </span>
                             <span className="text-xs text-muted-foreground">20 min</span>
@@ -225,7 +225,7 @@ export default function DailyView() {
                           {/* Customer Info */}
                           <div className="flex flex-col gap-1">
                             <h3 className={cn(
-                              "font-display text-lg font-semibold text-foreground",
+                              "font-display text-lg font-bold text-foreground uppercase",
                               appointment.isCompleted && "line-through decoration-muted-foreground"
                             )}>
                               {appointment.customerName}
@@ -255,7 +255,7 @@ export default function DailyView() {
                               handleStatusToggle(appointment);
                             }}
                             className={cn(
-                              "p-2 rounded-lg transition-colors hover-elevate",
+                              "p-2 transition-colors hover-elevate",
                               appointment.isCompleted && "text-green-600 bg-green-50"
                             )}
                             title={appointment.isCompleted ? "Mark incomplete" : "Mark complete"}
@@ -268,7 +268,7 @@ export default function DailyView() {
                             <DropdownMenuTrigger asChild>
                               <button 
                                 onClick={(e) => e.stopPropagation()}
-                                className="p-2 text-muted-foreground rounded-lg transition-colors hover-elevate"
+                                className="p-2 text-muted-foreground transition-colors hover-elevate"
                                 data-testid={`button-actions-${appointment.id}`}
                               >
                                 <MoreVertical className="w-4 h-4" />
@@ -300,18 +300,18 @@ export default function DailyView() {
                     <button
                       onClick={() => handleSlotClick(time)}
                       className={cn(
-                        "w-full flex items-center gap-4 px-4 py-3 rounded-xl border-2 border-dashed border-border/50 transition-all group hover-elevate",
+                        "w-full flex items-center gap-4 px-4 py-3 border-2 border-dashed border-border/50 transition-all group hover-elevate",
                         isHourStart && "border-border"
                       )}
                       data-testid={`slot-empty-${time.replace(':', '')}`}
                     >
                       <span className={cn(
                         "text-sm min-w-[70px] text-center",
-                        isHourStart ? "font-medium text-foreground" : "text-muted-foreground"
+                        isHourStart ? "font-bold text-foreground" : "text-muted-foreground"
                       )}>
                         {formatTimeAmPm(time)}
                       </span>
-                      <span className="text-sm text-muted-foreground group-hover:text-accent transition-colors">
+                      <span className="text-sm text-muted-foreground group-hover:text-primary transition-colors font-medium">
                         + Book appointment
                       </span>
                     </button>
@@ -324,9 +324,9 @@ export default function DailyView() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-border bg-white/50 mt-8">
-        <div className="max-w-4xl mx-auto px-4 py-4 text-center text-sm text-muted-foreground">
-          The Family Barbershop • {format(currentDate, "PPPP")}
+      <footer className="bg-accent mt-8">
+        <div className="max-w-4xl mx-auto px-4 py-4 text-center text-sm text-white/70">
+          <span className="font-display font-bold uppercase">The Family Barbershop</span> • {format(currentDate, "PPPP")}
         </div>
       </footer>
 

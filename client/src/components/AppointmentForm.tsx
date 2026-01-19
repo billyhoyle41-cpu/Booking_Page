@@ -120,14 +120,14 @@ export function AppointmentForm({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[450px] bg-card border-border card-shadow">
+      <DialogContent className="sm:max-w-[450px] bg-card border-border card-shadow rounded-none">
         <DialogHeader className="pb-4 border-b border-border">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center">
-              <Clock className="w-5 h-5 text-accent" />
+            <div className="w-10 h-10 bg-primary flex items-center justify-center">
+              <Clock className="w-5 h-5 text-primary-foreground" />
             </div>
             <div>
-              <DialogTitle className="text-xl font-display font-semibold text-foreground">
+              <DialogTitle className="text-xl font-display font-bold text-foreground uppercase">
                 {existingAppointment ? "Edit Appointment" : "New Booking"}
               </DialogTitle>
               <p className="text-sm text-muted-foreground mt-0.5">{formattedTime}</p>
@@ -145,7 +145,7 @@ export function AppointmentForm({
             <input
               required
               autoFocus
-              className="w-full bg-background border border-border rounded-lg px-4 py-3 text-foreground outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-muted-foreground"
+              className="w-full bg-background border border-border px-4 py-3 text-foreground outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder:text-muted-foreground"
               placeholder="Enter customer name"
               value={formData.customerName}
               onChange={(e) => setFormData(prev => ({ ...prev, customerName: e.target.value }))}
@@ -162,7 +162,7 @@ export function AppointmentForm({
               </label>
               <input
                 type="tel"
-                className="w-full bg-background border border-border rounded-lg px-4 py-3 text-foreground outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-muted-foreground"
+                className="w-full bg-background border border-border px-4 py-3 text-foreground outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder:text-muted-foreground"
                 placeholder="(555) 555-5555"
                 value={formData.phoneNumber}
                 onChange={handlePhoneChange}
@@ -177,7 +177,7 @@ export function AppointmentForm({
               </label>
               <input
                 type="email"
-                className="w-full bg-background border border-border rounded-lg px-4 py-3 text-foreground outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-muted-foreground"
+                className="w-full bg-background border border-border px-4 py-3 text-foreground outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder:text-muted-foreground"
                 placeholder="email@example.com"
                 value={formData.email}
                 onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
@@ -193,7 +193,7 @@ export function AppointmentForm({
               Service
             </label>
             <input
-              className="w-full bg-background border border-border rounded-lg px-4 py-3 text-foreground outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-muted-foreground"
+              className="w-full bg-background border border-border px-4 py-3 text-foreground outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder:text-muted-foreground"
               placeholder="Haircut, Beard Trim, etc."
               value={formData.service}
               onChange={(e) => setFormData(prev => ({ ...prev, service: e.target.value }))}
@@ -208,7 +208,7 @@ export function AppointmentForm({
               Notes
             </label>
             <textarea
-              className="w-full bg-background border border-border rounded-lg px-4 py-3 text-foreground outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-muted-foreground resize-none"
+              className="w-full bg-background border border-border px-4 py-3 text-foreground outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder:text-muted-foreground resize-none"
               placeholder="Any additional notes..."
               rows={2}
               value={formData.notes}
@@ -222,7 +222,7 @@ export function AppointmentForm({
             <button
               type="button"
               onClick={() => onOpenChange(false)}
-              className="px-5 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
+              className="px-5 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover-elevate"
               data-testid="button-cancel"
             >
               Cancel
@@ -230,7 +230,7 @@ export function AppointmentForm({
             <button
               type="submit"
               disabled={isPending}
-              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="inline-flex items-center gap-2 px-6 py-2.5 bg-primary text-primary-foreground font-bold uppercase tracking-wide hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               data-testid="button-save"
             >
               {isPending ? (

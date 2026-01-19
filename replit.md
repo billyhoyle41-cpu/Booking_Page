@@ -2,7 +2,15 @@
 
 ## Overview
 
-A paper-themed appointment scheduling application that allows users to manage daily appointments. The application displays time slots in 20-minute intervals from 9am to 5pm, enabling users to create, view, update, and delete appointments for any given day. The UI is designed with a handwritten, notebook-style aesthetic.
+A tablet-friendly digital appointment book for The Family Barbershop. The application displays time slots in 20-minute intervals from 9 AM to 5 PM (America/Detroit timezone with DST handling), enabling users to create, view, update, and delete appointments for any given day. The UI matches the branding of https://family-cuts--billyhoyle41.replit.app/ with a professional red and navy color scheme.
+
+## Brand Style Guide
+- **Primary Color (Red)**: #CF2029 - Used for buttons, accents, left border on appointments
+- **Accent Color (Navy)**: #192D5D - Used for header, footer, text
+- **Background**: #F8F8F6 (off-white)
+- **Typography**: Montserrat (headings, uppercase, bold), Inter (body)
+- **Border Radius**: 0px (sharp corners throughout)
+- **Time Format**: AM/PM (e.g., "9:00 AM", "12:00 PM")
 
 ## User Preferences
 
@@ -14,7 +22,7 @@ Preferred communication style: Simple, everyday language.
 - **Framework**: React with TypeScript
 - **Routing**: Wouter for lightweight client-side routing
 - **State Management**: TanStack React Query for server state and caching
-- **Styling**: Tailwind CSS with a custom paper/notebook theme
+- **Styling**: Tailwind CSS with Family Barbershop brand theme (red/navy)
 - **UI Components**: shadcn/ui component library built on Radix UI primitives
 - **Animations**: Framer Motion for smooth transitions
 - **Build Tool**: Vite for development and production builds
