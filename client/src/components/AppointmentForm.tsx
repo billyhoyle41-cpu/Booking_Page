@@ -145,7 +145,7 @@ export function AppointmentForm({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent 
-        className="sm:max-w-[450px] bg-card border-border card-shadow rounded-none p-0 flex flex-col w-full h-full max-h-full sm:h-auto sm:max-h-[85vh] fixed inset-0 sm:inset-auto sm:left-[50%] sm:top-[50%] sm:translate-x-[-50%] sm:translate-y-[-50%]"
+        className="sm:max-w-[450px] bg-card border-border card-shadow rounded-none p-0 flex flex-col w-full h-full max-h-full sm:h-auto sm:max-h-[85vh] !left-0 !top-0 !translate-x-0 !translate-y-0 sm:!left-[50%] sm:!top-[50%] sm:!translate-x-[-50%] sm:!translate-y-[-50%]"
       >
         <DialogHeader className="p-4 sm:p-6 pb-3 sm:pb-4 border-b border-border flex-shrink-0">
           <div className="flex items-center gap-3">
