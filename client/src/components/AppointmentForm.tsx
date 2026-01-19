@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { type AppointmentInput, type AppointmentUpdateInput } from "@shared/routes";
 import { useCreateAppointment, useUpdateAppointment } from "@/hooks/use-appointments";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -117,11 +117,59 @@ export function AppointmentForm({
   };
 
   const formattedTime = format(parse(time, 'HH:mm', new Date()), 'h:mm a');
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [viewportHeight, setViewportHeight] = useState<number | null>(null);
+
+  // Track visual viewport height for mobile keyboard handling
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.visualViewport) {
+      const updateHeight = () => {
+        setViewportHeight(window.visualViewport!.height);
+      };
+      
+      updateHeight();
+      window.visualViewport.addEventListener('resize', updateHeight);
+      return () => {
+        window.visualViewport?.removeEventListener('resize', updateHeight);
+      };
+    }
+  }, [open]);
+
+  // Scroll focused input into view within the scroll container
+  const handleInputFocus = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const target = e.target;
+    const container = scrollContainerRef.current;
+    
+    // Small delay to allow keyboard to open
+    setTimeout(() => {
+      if (container) {
+        // Get positions relative to the scroll container
+        const targetRect = target.getBoundingClientRect();
+        const containerRect = container.getBoundingClientRect();
+        
+        // Calculate offset to center the input in the visible area
+        const scrollOffset = target.offsetTop - container.offsetTop - (container.clientHeight / 2) + (target.clientHeight / 2);
+        
+        container.scrollTo({
+          top: Math.max(0, scrollOffset),
+          behavior: 'smooth'
+        });
+      }
+    }, 150);
+  };
+  
+  // Calculate max height based on visual viewport
+  const dialogMaxHeight = viewportHeight 
+    ? Math.min(viewportHeight * 0.85, 600) 
+    : undefined;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[450px] bg-card border-border card-shadow rounded-none p-0 max-h-[85vh] flex flex-col">
-        <DialogHeader className="p-6 pb-4 border-b border-border flex-shrink-0">
+      <DialogContent 
+        className="sm:max-w-[450px] bg-card border-border card-shadow rounded-none p-0 flex flex-col"
+        style={dialogMaxHeight ? { maxHeight: `${dialogMaxHeight}px` } : { maxHeight: '85vh' }}
+      >
+        <DialogHeader className="p-4 sm:p-6 pb-3 sm:pb-4 border-b border-border flex-shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-primary flex items-center justify-center">
               <Clock className="w-5 h-5 text-primary-foreground" />
@@ -135,8 +183,8 @@ export function AppointmentForm({
           </div>
         </DialogHeader>
         
-        <div className="flex-1 overflow-y-auto overscroll-contain touch-pan-y p-6 pt-4">
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <div ref={scrollContainerRef} className="flex-1 overflow-y-auto overscroll-contain touch-pan-y p-4 sm:p-6 pt-3 sm:pt-4 min-h-0">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
           {/* Customer Name */}
           <div className="space-y-2">
             <label className="flex items-center gap-2 text-sm font-medium text-foreground">
@@ -150,6 +198,7 @@ export function AppointmentForm({
               placeholder="Enter customer name"
               value={formData.customerName}
               onChange={(e) => setFormData(prev => ({ ...prev, customerName: e.target.value }))}
+              onFocus={handleInputFocus}
               data-testid="input-customer-name"
             />
           </div>
@@ -167,6 +216,7 @@ export function AppointmentForm({
                 placeholder="(555) 555-5555"
                 value={formData.phoneNumber}
                 onChange={handlePhoneChange}
+                onFocus={handleInputFocus}
                 maxLength={14}
                 data-testid="input-phone"
               />
@@ -182,6 +232,7 @@ export function AppointmentForm({
                 placeholder="email@example.com"
                 value={formData.email}
                 onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                onFocus={handleInputFocus}
                 data-testid="input-email"
               />
             </div>
@@ -198,6 +249,7 @@ export function AppointmentForm({
               placeholder="Haircut, Beard Trim, etc."
               value={formData.service}
               onChange={(e) => setFormData(prev => ({ ...prev, service: e.target.value }))}
+              onFocus={handleInputFocus}
               data-testid="input-service"
             />
           </div>
@@ -214,6 +266,7 @@ export function AppointmentForm({
               rows={2}
               value={formData.notes}
               onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
+              onFocus={handleInputFocus}
               data-testid="input-notes"
             />
           </div>
