@@ -104,7 +104,7 @@ export default function DailyView() {
                 alt="The Family Barbershop" 
                 className="h-12 w-auto"
               />
-              <p className="text-sm text-white/70">Appointment Book</p>
+              <span className="text-sm text-white/70 font-display uppercase tracking-wide">Appointment Book</span>
             </div>
             
             <button
