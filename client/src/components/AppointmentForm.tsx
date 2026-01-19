@@ -120,8 +120,8 @@ export function AppointmentForm({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[450px] bg-card border-border card-shadow rounded-none">
-        <DialogHeader className="pb-4 border-b border-border">
+      <DialogContent className="sm:max-w-[450px] bg-card border-border card-shadow rounded-none p-0 max-h-[85vh] flex flex-col">
+        <DialogHeader className="p-6 pb-4 border-b border-border flex-shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-primary flex items-center justify-center">
               <Clock className="w-5 h-5 text-primary-foreground" />
@@ -135,7 +135,8 @@ export function AppointmentForm({
           </div>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit} className="space-y-5 pt-4">
+        <div className="flex-1 overflow-y-auto overscroll-contain touch-pan-y p-6 pt-4">
+        <form onSubmit={handleSubmit} className="space-y-5">
           {/* Customer Name */}
           <div className="space-y-2">
             <label className="flex items-center gap-2 text-sm font-medium text-foreground">
@@ -247,6 +248,7 @@ export function AppointmentForm({
             </button>
           </div>
         </form>
+        </div>
       </DialogContent>
     </Dialog>
   );
