@@ -16,6 +16,7 @@ import {
   RefreshCw,
   User,
   Phone,
+  MessageSquare,
   Scissors
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -229,9 +230,26 @@ export default function DailyView() {
                             </h3>
                             <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
                               {appointment.phoneNumber && (
-                                <span className="flex items-center gap-1">
-                                  <Phone className="w-3 h-3" />
-                                  {appointment.phoneNumber}
+                                <span className="flex items-center gap-2">
+                                  <a 
+                                    href={`tel:${appointment.phoneNumber.replace(/\D/g, '')}`}
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="flex items-center gap-1 text-primary underline"
+                                    data-testid={`link-call-${appointment.id}`}
+                                    title="Call"
+                                  >
+                                    <Phone className="w-3 h-3" />
+                                    {appointment.phoneNumber}
+                                  </a>
+                                  <a
+                                    href={`sms:${appointment.phoneNumber.replace(/\D/g, '')}`}
+                                    onClick={(e) => e.stopPropagation()}
+                                    className="text-primary"
+                                    data-testid={`link-text-${appointment.id}`}
+                                    title="Send text message"
+                                  >
+                                    <MessageSquare className="w-3 h-3" />
+                                  </a>
                                 </span>
                               )}
                               {appointment.service && (
