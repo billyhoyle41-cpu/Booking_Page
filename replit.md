@@ -50,6 +50,7 @@ Single `appointments` table with fields:
 - `customerName` (text, required)
 - `phoneNumber`, `email`, `service`, `notes` (optional text fields)
 - `isCompleted` (boolean, defaults to false)
+- `googleEventId` (text, optional - for syncing with Google Calendar)
 
 ### API Endpoints
 - `GET /api/appointments?date=YYYY-MM-DD` - List appointments for a date
@@ -57,6 +58,18 @@ Single `appointments` table with fields:
 - `POST /api/appointments` - Create new appointment
 - `PUT /api/appointments/:id` - Update appointment
 - `DELETE /api/appointments/:id` - Delete appointment
+- `POST /api/calendar/sync` - Sync appointments from Google Calendar
+- `POST /api/calendar/webhook` - Webhook for Google Calendar push notifications
+- `GET /api/calendar/info` - Get synced calendar info
+
+### Google Calendar Integration
+- **Calendar ID**: `de43e8a726b5cbbd1c985cc89093f02ac1df504f0896b55b8bba74610b259d4e@group.calendar.google.com`
+- **Timezone**: America/Detroit (with automatic DST handling via date-fns-tz)
+- **Bidirectional Sync**: 
+  - App → Calendar: Appointments created/updated/deleted in app sync to Google Calendar
+  - Calendar → App: Manual sync button + 30-second auto-refresh polling
+  - Appointments synced from calendar are identified by `googleEventId` for proper upsert/delete handling
+- **Event Format**: Events use "Barber: {customerName}" as title, with service/phone/email/notes in description
 
 ### Development vs Production
 - Development: Vite dev server with HMR, serves from source

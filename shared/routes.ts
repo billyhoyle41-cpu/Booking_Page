@@ -23,12 +23,18 @@ export const api = {
         200: z.object({ summary: z.string().nullable() }),
       },
     },
-    deleteBrendasCalendar: {
+    calendarSync: {
       method: 'POST' as const,
-      path: '/api/calendar/delete-brendas',
+      path: '/api/calendar/sync',
       responses: {
         200: z.object({ message: z.string() }),
-        404: z.object({ message: z.string() }),
+      },
+    },
+    calendarWatch: {
+      method: 'POST' as const,
+      path: '/api/calendar/watch',
+      responses: {
+        200: z.object({ message: z.string(), channelId: z.string().optional() }),
       },
     },
     list: {

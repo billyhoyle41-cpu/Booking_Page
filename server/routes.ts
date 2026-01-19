@@ -5,15 +5,58 @@ import { api } from "@shared/routes";
 import { z } from "zod";
 import { TIME_SLOTS } from "@shared/schema";
 
-import { createCalendarEvent, getSyncedCalendarInfo } from "./google-calendar";
+import { createCalendarEvent, updateCalendarEvent, deleteCalendarEvent, getSyncedCalendarInfo, setupCalendarWatch, handleCalendarWebhook, syncFromGoogleCalendar } from "./google-calendar";
 
 export async function registerRoutes(
   httpServer: Server,
   app: Express
 ): Promise<Server> {
 
-  app.post("/api/calendar/delete-brendas", async (_req, res) => {
-    res.status(410).json({ message: "This operation is no longer supported with fixed calendar ID" });
+  // Google Calendar webhook endpoint - receives push notifications
+  app.post("/api/calendar/webhook", async (req, res) => {
+    try {
+      const headers: Record<string, string> = {};
+      for (const [key, value] of Object.entries(req.headers)) {
+        if (typeof value === 'string') {
+          headers[key] = value;
+        }
+      }
+      await handleCalendarWebhook(headers);
+      res.status(200).send('OK');
+    } catch (err) {
+      console.error("Webhook error:", err);
+      res.status(500).send('Error');
+    }
+  });
+
+  // Manual sync endpoint
+  app.post("/api/calendar/sync", async (_req, res) => {
+    try {
+      const synced = await syncFromGoogleCalendar();
+      res.json({ message: `Synced ${synced} appointments from Google Calendar` });
+    } catch (err) {
+      res.status(500).json({ message: "Failed to sync from Google Calendar" });
+    }
+  });
+
+  // Set up calendar watch endpoint
+  app.post("/api/calendar/watch", async (req, res) => {
+    try {
+      // Get the host from request headers or environment
+      const host = req.headers.host || process.env.REPLIT_DEV_DOMAIN || '';
+      const protocol = host.includes('localhost') ? 'http' : 'https';
+      const webhookUrl = `${protocol}://${host}/api/calendar/webhook`;
+      
+      const result = await setupCalendarWatch(webhookUrl);
+      if (result) {
+        res.json({ message: "Calendar watch set up successfully", channelId: result.id });
+      } else {
+        res.status(500).json({ message: "Failed to set up calendar watch" });
+      }
+    } catch (err) {
+      console.error("Watch setup error:", err);
+      res.status(500).json({ message: "Failed to set up calendar watch" });
+    }
   });
 
   app.get("/api/calendar/info", async (_req, res) => {
@@ -94,6 +137,14 @@ export async function registerRoutes(
       }
 
       const updated = await storage.updateAppointment(id, input);
+      
+      // Sync update to Google Calendar
+      try {
+        await updateCalendarEvent(updated);
+      } catch (err) {
+        console.error("Failed to sync update to Google Calendar:", err);
+      }
+      
       res.json(updated);
     } catch (err) {
       if (err instanceof z.ZodError) {
@@ -111,6 +162,15 @@ export async function registerRoutes(
     const existing = await storage.getAppointment(id);
     if (!existing) {
       return res.status(404).json({ message: "Appointment not found" });
+    }
+    
+    // Delete from Google Calendar first
+    if (existing.googleEventId) {
+      try {
+        await deleteCalendarEvent(existing.googleEventId);
+      } catch (err) {
+        console.error("Failed to delete from Google Calendar:", err);
+      }
     }
     
     await storage.deleteAppointment(id);

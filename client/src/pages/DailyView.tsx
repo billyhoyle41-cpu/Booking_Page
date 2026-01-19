@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { format, addDays, subDays, isToday, parseISO } from "date-fns";
-import { useAppointments, useDeleteAppointment, useUpdateAppointment } from "@/hooks/use-appointments";
+import { useAppointments, useDeleteAppointment, useUpdateAppointment, useSyncFromCalendar } from "@/hooks/use-appointments";
 import { AppointmentForm } from "@/components/AppointmentForm";
 import { TIME_SLOTS, type Appointment } from "@shared/schema";
 import { 
@@ -12,7 +12,8 @@ import {
   Trash2, 
   CheckCircle2, 
   XCircle,
-  Pencil
+  Pencil,
+  RefreshCw
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -47,6 +48,7 @@ export default function DailyView() {
   // Mutations
   const deleteMutation = useDeleteAppointment();
   const updateMutation = useUpdateAppointment();
+  const syncMutation = useSyncFromCalendar();
 
   // Helper to find appointment for a slot
   const getAppointmentForSlot = (time: string) => {
@@ -102,6 +104,15 @@ export default function DailyView() {
                 Today
               </span>
             )}
+            <button
+              onClick={() => syncMutation.mutate()}
+              disabled={syncMutation.isPending}
+              className="p-2 hover:bg-stone-100 rounded-md text-stone-500 hover:text-stone-700 transition-colors"
+              title="Sync from Google Calendar"
+              data-testid="button-sync-calendar"
+            >
+              <RefreshCw className={cn("w-5 h-5", syncMutation.isPending && "animate-spin")} />
+            </button>
           </div>
 
           <div className="flex items-center gap-2 bg-white p-1.5 rounded-lg border border-stone-200 shadow-sm">

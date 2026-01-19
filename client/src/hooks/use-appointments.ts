@@ -15,6 +15,7 @@ export function useAppointments(date: Date) {
       if (!res.ok) throw new Error('Failed to fetch appointments');
       return api.appointments.list.responses[200].parse(await res.json());
     },
+    refetchInterval: 30000, // Auto-refresh every 30 seconds to catch calendar changes
   });
 }
 
@@ -106,6 +107,27 @@ export function useDeleteAppointment() {
     onSuccess: (date) => {
       queryClient.invalidateQueries({ 
         queryKey: [api.appointments.list.path, { date }] 
+      });
+    },
+  });
+}
+
+// POST /api/calendar/sync - Manual sync from Google Calendar
+export function useSyncFromCalendar() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async () => {
+      const res = await fetch('/api/calendar/sync', {
+        method: 'POST',
+        credentials: "include",
+      });
+      if (!res.ok) throw new Error('Failed to sync from calendar');
+      return res.json();
+    },
+    onSuccess: () => {
+      // Invalidate all appointment queries to refresh data
+      queryClient.invalidateQueries({ 
+        queryKey: [api.appointments.list.path] 
       });
     },
   });

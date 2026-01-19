@@ -12,6 +12,7 @@ export const appointments = pgTable("appointments", {
   service: text("service"),
   notes: text("notes"),
   isCompleted: boolean("is_completed").default(false),
+  googleEventId: text("google_event_id"), // For syncing with Google Calendar
 });
 
 export const insertAppointmentSchema = createInsertSchema(appointments).omit({ id: true });
