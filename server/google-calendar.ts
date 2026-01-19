@@ -2,6 +2,7 @@
 import { google } from 'googleapis';
 
 const CALENDAR_ID = 'de43e8a726b5cbbd1c985cc89093f02ac1df504f0896b55b8bba74610b259d4e@group.calendar.google.com';
+const TIMEZONE = 'America/Detroit';
 
 let connectionSettings: any;
 
@@ -79,9 +80,11 @@ export async function createCalendarEvent(appointment: any) {
       description: `Service: ${appointment.service || 'N/A'}\nNotes: ${appointment.notes || ''}\nPhone: ${appointment.phoneNumber || ''}\nEmail: ${appointment.email || ''}`,
       start: {
         dateTime: startDateTime.toISOString(),
+        timeZone: TIMEZONE,
       },
       end: {
         dateTime: endDateTime.toISOString(),
+        timeZone: TIMEZONE,
       },
     };
 
