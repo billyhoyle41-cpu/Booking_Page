@@ -13,7 +13,10 @@ import {
   CheckCircle2, 
   XCircle,
   Pencil,
-  RefreshCw
+  RefreshCw,
+  User,
+  Phone,
+  Scissors
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -27,7 +30,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar"; // Assuming standard shadcn calendar exists or will be generated
+import { Calendar } from "@/components/ui/calendar";
 import { AnimatePresence, motion } from "framer-motion";
 
 export default function DailyView() {
@@ -87,136 +90,157 @@ export default function DailyView() {
   };
 
   const dateStr = format(currentDate, "yyyy-MM-dd");
-  const displayDate = format(currentDate, "EEEE, MMMM do, yyyy");
+  const displayDate = format(currentDate, "EEEE, MMMM do");
 
   return (
-    <div className="min-h-screen bg-stone-100 p-4 md:p-8 flex justify-center items-start font-sans">
-      
-      {/* The Book Container */}
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-4xl bg-[#faf9f6] rounded-xl paper-shadow overflow-hidden relative min-h-[800px] border border-stone-200"
-      >
-        
-        {/* Header Section */}
-        <header className="px-6 py-6 border-b border-stone-200/60 bg-[#fdfcf9] sticky top-0 z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <h1 className="text-2xl md:text-3xl font-hand font-bold text-primary tracking-wide">
-              Appointments
-            </h1>
-            {isToday(currentDate) && (
-              <span className="px-3 py-1 bg-primary/10 text-primary text-xs font-bold rounded-full uppercase tracking-widest">
-                Today
-              </span>
-            )}
+    <div className="min-h-screen warm-gradient">
+      {/* Header */}
+      <header className="bg-white/80 backdrop-blur-sm border-b border-border sticky top-0 z-20">
+        <div className="max-w-4xl mx-auto px-4 py-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center">
+                <Scissors className="w-5 h-5 text-primary-foreground" />
+              </div>
+              <div>
+                <h1 className="text-xl font-display font-semibold text-foreground">
+                  The Family Barbershop
+                </h1>
+                <p className="text-sm text-muted-foreground">Appointment Book</p>
+              </div>
+            </div>
+            
             <button
               onClick={() => syncMutation.mutate()}
               disabled={syncMutation.isPending}
-              className="p-2 hover:bg-stone-100 rounded-md text-stone-500 hover:text-stone-700 transition-colors"
+              className="flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground rounded-lg transition-colors hover-elevate"
               title="Sync from Google Calendar"
               data-testid="button-sync-calendar"
             >
-              <RefreshCw className={cn("w-5 h-5", syncMutation.isPending && "animate-spin")} />
+              <RefreshCw className={cn("w-4 h-4", syncMutation.isPending && "animate-spin")} />
+              <span className="hidden sm:inline">Sync Calendar</span>
             </button>
           </div>
+        </div>
+      </header>
 
-          <div className="flex items-center gap-2 bg-white p-1.5 rounded-lg border border-stone-200 shadow-sm">
+      <main className="max-w-4xl mx-auto px-4 py-6">
+        {/* Date Navigation */}
+        <div className="bg-white rounded-xl card-shadow p-4 mb-6">
+          <div className="flex items-center justify-between">
             <button 
               onClick={handlePrevDay}
-              className="p-2 hover:bg-stone-100 rounded-md text-stone-600 transition-colors"
+              className="p-2 rounded-lg text-muted-foreground transition-colors hover-elevate"
               aria-label="Previous day"
+              data-testid="button-prev-day"
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
             
-            <Popover>
-              <PopoverTrigger asChild>
-                <button className="flex items-center gap-2 px-3 py-1.5 hover:bg-stone-100 rounded-md transition-colors min-w-[200px] justify-center text-sm font-medium text-stone-700">
-                  <CalendarIcon className="w-4 h-4 text-stone-500" />
-                  {displayDate}
-                </button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="center">
-                <Calendar
-                  mode="single"
-                  selected={currentDate}
-                  onSelect={(d) => d && setCurrentDate(d)}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
+            <div className="flex items-center gap-3">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button 
+                    className="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors hover-elevate"
+                    data-testid="button-date-picker"
+                  >
+                    <CalendarIcon className="w-5 h-5 text-accent" />
+                    <span className="font-display text-lg font-medium text-foreground">
+                      {displayDate}
+                    </span>
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="center">
+                  <Calendar
+                    mode="single"
+                    selected={currentDate}
+                    onSelect={(d) => d && setCurrentDate(d)}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+              
+              {isToday(currentDate) && (
+                <span className="px-3 py-1 bg-accent/10 text-accent text-xs font-semibold rounded-full uppercase tracking-wide">
+                  Today
+                </span>
+              )}
+            </div>
 
             <button 
               onClick={handleNextDay}
-              className="p-2 hover:bg-stone-100 rounded-md text-stone-600 transition-colors"
+              className="p-2 rounded-lg text-muted-foreground transition-colors hover-elevate"
               aria-label="Next day"
+              data-testid="button-next-day"
             >
               <ChevronRight className="w-5 h-5" />
             </button>
           </div>
-        </header>
+        </div>
 
         {/* Loading State */}
         {isLoading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-white/50 z-20 backdrop-blur-sm">
+          <div className="flex items-center justify-center py-20">
             <div className="flex flex-col items-center gap-3">
-              <div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
-              <p className="text-stone-500 font-hand text-xl">Opening the book...</p>
+              <div className="w-10 h-10 border-4 border-accent/20 border-t-accent rounded-full animate-spin" />
+              <p className="text-muted-foreground">Loading appointments...</p>
             </div>
           </div>
         )}
 
-        {/* Book Content - The "Paper" Area */}
-        <div className="relative min-h-[700px] notebook-lines pb-20">
-          {/* Red Margin Line */}
-          <div className="absolute left-[80px] md:left-[120px] top-0 bottom-0 border-l-2 border-red-300/50 h-full z-0 pointer-events-none" />
-
-          {/* Time Slots */}
-          <div className="pt-6 relative z-1">
-            {TIME_SLOTS.map((time) => {
+        {/* Time Slots */}
+        {!isLoading && (
+          <div className="space-y-2">
+            {TIME_SLOTS.map((time, index) => {
               const appointment = getAppointmentForSlot(time);
-              const isPast = false; // Could implement based on current time if 'today'
+              const isHourStart = time.endsWith(':00');
 
               return (
-                <div 
-                  key={time} 
-                  className="group flex items-start h-[3rem] relative hover:bg-stone-50/50 transition-colors"
+                <motion.div
+                  key={time}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.02 }}
                 >
-                  {/* Time Column */}
-                  <div className="w-[80px] md:w-[120px] flex-shrink-0 flex items-start justify-end pr-4 md:pr-6 pt-2">
-                    <span className="font-mono text-sm text-stone-400 group-hover:text-stone-600 transition-colors">
-                      {formatTimeAmPm(time)}
-                    </span>
-                  </div>
-
-                  {/* Appointment Slot */}
-                  <div className="flex-grow flex items-center h-full pr-4 pl-4 md:pl-6 relative">
-                    {appointment ? (
-                      <div className={cn(
-                        "w-full flex items-center justify-between group/apt transition-all duration-300",
-                        appointment.isCompleted && "opacity-50 grayscale"
-                      )}>
-                        <div 
-                          className="flex items-center gap-3 cursor-pointer"
-                          onClick={() => handleSlotClick(time, appointment)}
-                        >
-                          <div className="flex flex-col">
-                            <span className={cn(
-                              "text-xl md:text-2xl font-hand text-primary transition-all leading-tight",
-                              appointment.isCompleted && "line-through decoration-stone-400 decoration-2"
+                  {appointment ? (
+                    /* Booked Slot */
+                    <div 
+                      className={cn(
+                        "bg-white rounded-xl card-shadow p-4 transition-all hover:card-shadow-hover cursor-pointer group",
+                        appointment.isCompleted && "opacity-60"
+                      )}
+                      onClick={() => handleSlotClick(time, appointment)}
+                      data-testid={`slot-appointment-${appointment.id}`}
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex items-start gap-4">
+                          {/* Time */}
+                          <div className="flex flex-col items-center min-w-[70px]">
+                            <span className="text-sm font-medium text-accent">
+                              {formatTimeAmPm(time)}
+                            </span>
+                            <span className="text-xs text-muted-foreground">20 min</span>
+                          </div>
+                          
+                          {/* Customer Info */}
+                          <div className="flex flex-col gap-1">
+                            <h3 className={cn(
+                              "font-display text-lg font-semibold text-foreground",
+                              appointment.isCompleted && "line-through decoration-muted-foreground"
                             )}>
                               {appointment.customerName}
-                            </span>
-                            <div className="flex items-center gap-2">
+                            </h3>
+                            <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
                               {appointment.phoneNumber && (
-                                <span className="text-[10px] text-stone-400 font-mono">
+                                <span className="flex items-center gap-1">
+                                  <Phone className="w-3 h-3" />
                                   {appointment.phoneNumber}
                                 </span>
                               )}
                               {appointment.service && (
-                                <span className="text-[10px] uppercase tracking-wider text-stone-400 font-medium">
-                                  • {appointment.service}
+                                <span className="flex items-center gap-1">
+                                  <Scissors className="w-3 h-3" />
+                                  {appointment.service}
                                 </span>
                               )}
                             </div>
@@ -224,32 +248,44 @@ export default function DailyView() {
                         </div>
 
                         {/* Actions */}
-                        <div className="flex items-center gap-1 opacity-0 group-hover/apt:opacity-100 transition-opacity">
+                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                           <button
-                            onClick={() => handleStatusToggle(appointment)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleStatusToggle(appointment);
+                            }}
                             className={cn(
-                              "p-2 rounded-full hover:bg-stone-200/50 transition-colors",
-                              appointment.isCompleted ? "text-green-600" : "text-stone-400"
+                              "p-2 rounded-lg transition-colors hover-elevate",
+                              appointment.isCompleted && "text-green-600 bg-green-50"
                             )}
                             title={appointment.isCompleted ? "Mark incomplete" : "Mark complete"}
+                            data-testid={`button-toggle-status-${appointment.id}`}
                           >
                             <CheckCircle2 className="w-5 h-5" />
                           </button>
                           
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <button className="p-2 text-stone-400 hover:text-stone-600 rounded-full hover:bg-stone-200/50 transition-colors">
+                              <button 
+                                onClick={(e) => e.stopPropagation()}
+                                className="p-2 text-muted-foreground rounded-lg transition-colors hover-elevate"
+                                data-testid={`button-actions-${appointment.id}`}
+                              >
                                 <MoreVertical className="w-4 h-4" />
                               </button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="font-sans">
-                              <DropdownMenuItem onClick={() => handleSlotClick(time, appointment)}>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem 
+                                onClick={() => handleSlotClick(time, appointment)}
+                                data-testid={`menu-edit-${appointment.id}`}
+                              >
                                 <Pencil className="w-4 h-4 mr-2" />
                                 Edit Details
                               </DropdownMenuItem>
                               <DropdownMenuItem 
                                 onClick={() => handleDelete(appointment)}
-                                className="text-red-600 focus:text-red-600 focus:bg-red-50"
+                                className="text-destructive focus:text-destructive focus:bg-destructive/10"
+                                data-testid={`menu-delete-${appointment.id}`}
                               >
                                 <Trash2 className="w-4 h-4 mr-2" />
                                 Cancel Appointment
@@ -258,29 +294,41 @@ export default function DailyView() {
                           </DropdownMenu>
                         </div>
                       </div>
-                    ) : (
-                      /* Empty Slot */
-                      <button
-                        onClick={() => handleSlotClick(time)}
-                        className="w-full h-full text-left opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-2"
-                      >
-                        <div className="h-[2px] w-6 bg-stone-200" />
-                        <span className="text-stone-400 font-hand text-lg">Write entry...</span>
-                      </button>
-                    )}
-                  </div>
-                </div>
+                    </div>
+                  ) : (
+                    /* Empty Slot */
+                    <button
+                      onClick={() => handleSlotClick(time)}
+                      className={cn(
+                        "w-full flex items-center gap-4 px-4 py-3 rounded-xl border-2 border-dashed border-border/50 transition-all group hover-elevate",
+                        isHourStart && "border-border"
+                      )}
+                      data-testid={`slot-empty-${time.replace(':', '')}`}
+                    >
+                      <span className={cn(
+                        "text-sm min-w-[70px] text-center",
+                        isHourStart ? "font-medium text-foreground" : "text-muted-foreground"
+                      )}>
+                        {formatTimeAmPm(time)}
+                      </span>
+                      <span className="text-sm text-muted-foreground group-hover:text-accent transition-colors">
+                        + Book appointment
+                      </span>
+                    </button>
+                  )}
+                </motion.div>
               );
             })}
           </div>
-        </div>
+        )}
+      </main>
 
-        {/* Footer info */}
-        <div className="bg-[#fdfcf9] border-t border-stone-200 p-4 text-center text-xs text-stone-400 font-mono uppercase tracking-widest">
-          Daily Log • {format(currentDate, "PPP")}
+      {/* Footer */}
+      <footer className="border-t border-border bg-white/50 mt-8">
+        <div className="max-w-4xl mx-auto px-4 py-4 text-center text-sm text-muted-foreground">
+          The Family Barbershop • {format(currentDate, "PPPP")}
         </div>
-
-      </motion.div>
+      </footer>
 
       {/* Booking Form Modal */}
       {selectedSlot && (

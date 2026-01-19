@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { type AppointmentInput, type AppointmentUpdateInput } from "@shared/routes";
 import { useCreateAppointment, useUpdateAppointment } from "@/hooks/use-appointments";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Loader2, Save, X } from "lucide-react";
+import { Loader2, Save, X, Clock, User, Phone, Mail, Scissors, FileText } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { format, parse } from "date-fns";
 
@@ -75,13 +75,14 @@ export function AppointmentForm({
   };
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const formattedPhoneNumber = formatPhoneNumber(e.target.value);
-    setFormData(prev => ({ ...prev, phoneNumber: formattedPhoneNumber }));
+    const formatted = formatPhoneNumber(e.target.value);
+    setFormData(prev => ({ ...prev, phoneNumber: formatted }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+    if (!formData.customerName.trim()) return;
+
     try {
       if (existingAppointment) {
         await updateMutation.mutateAsync({
@@ -115,102 +116,122 @@ export function AppointmentForm({
     }
   };
 
+  const formattedTime = format(parse(time, 'HH:mm', new Date()), 'h:mm a');
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px] bg-[#faf9f6] border-neutral-200 shadow-xl paper-shadow font-sans">
-        <DialogHeader>
-          <DialogTitle className="text-2xl font-hand text-primary">
-            {existingAppointment ? "Edit Appointment" : "New Booking"} • {format(parse(time, 'HH:mm', new Date()), 'h:mm a')}
-          </DialogTitle>
+      <DialogContent className="sm:max-w-[450px] bg-card border-border card-shadow">
+        <DialogHeader className="pb-4 border-b border-border">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center">
+              <Clock className="w-5 h-5 text-accent" />
+            </div>
+            <div>
+              <DialogTitle className="text-xl font-display font-semibold text-foreground">
+                {existingAppointment ? "Edit Appointment" : "New Booking"}
+              </DialogTitle>
+              <p className="text-sm text-muted-foreground mt-0.5">{formattedTime}</p>
+            </div>
+          </div>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-          <div className="space-y-1">
-            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+        <form onSubmit={handleSubmit} className="space-y-5 pt-4">
+          {/* Customer Name */}
+          <div className="space-y-2">
+            <label className="flex items-center gap-2 text-sm font-medium text-foreground">
+              <User className="w-4 h-4 text-muted-foreground" />
               Customer Name
             </label>
             <input
               required
               autoFocus
-              className="w-full bg-transparent border-b-2 border-neutral-300 focus:border-primary px-1 py-1 text-2xl font-hand outline-none transition-colors placeholder:text-neutral-300"
-              placeholder="Name"
+              className="w-full bg-background border border-border rounded-lg px-4 py-3 text-foreground outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-muted-foreground"
+              placeholder="Enter customer name"
               value={formData.customerName}
               onChange={(e) => setFormData(prev => ({ ...prev, customerName: e.target.value }))}
+              data-testid="input-customer-name"
             />
           </div>
 
+          {/* Phone & Email */}
           <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1">
-              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
-                Phone Number
+            <div className="space-y-2">
+              <label className="flex items-center gap-2 text-sm font-medium text-foreground">
+                <Phone className="w-4 h-4 text-muted-foreground" />
+                Phone
               </label>
               <input
                 type="tel"
-                className="w-full bg-transparent border-b-2 border-neutral-300 focus:border-primary px-1 py-1 text-lg font-hand outline-none transition-colors placeholder:text-neutral-300"
-                placeholder="(222) 222-2222"
+                className="w-full bg-background border border-border rounded-lg px-4 py-3 text-foreground outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-muted-foreground"
+                placeholder="(555) 555-5555"
                 value={formData.phoneNumber}
                 onChange={handlePhoneChange}
                 maxLength={14}
+                data-testid="input-phone"
               />
             </div>
-            <div className="space-y-1">
-              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+            <div className="space-y-2">
+              <label className="flex items-center gap-2 text-sm font-medium text-foreground">
+                <Mail className="w-4 h-4 text-muted-foreground" />
                 Email
               </label>
               <input
                 type="email"
-                className="w-full bg-transparent border-b-2 border-neutral-300 focus:border-primary px-1 py-1 text-lg font-hand outline-none transition-colors placeholder:text-neutral-300"
-                placeholder="Email"
+                className="w-full bg-background border border-border rounded-lg px-4 py-3 text-foreground outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-muted-foreground"
+                placeholder="email@example.com"
                 value={formData.email}
                 onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                data-testid="input-email"
               />
             </div>
           </div>
 
-          <div className="space-y-1">
-            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+          {/* Service */}
+          <div className="space-y-2">
+            <label className="flex items-center gap-2 text-sm font-medium text-foreground">
+              <Scissors className="w-4 h-4 text-muted-foreground" />
               Service
             </label>
             <input
-              className="w-full bg-transparent border-b-2 border-neutral-300 focus:border-primary px-1 py-1 text-lg font-hand outline-none transition-colors placeholder:text-neutral-300"
-              placeholder="Service"
+              className="w-full bg-background border border-border rounded-lg px-4 py-3 text-foreground outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-muted-foreground"
+              placeholder="Haircut, Beard Trim, etc."
               value={formData.service}
               onChange={(e) => setFormData(prev => ({ ...prev, service: e.target.value }))}
+              data-testid="input-service"
             />
           </div>
 
-          <div className="space-y-1">
-            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+          {/* Notes */}
+          <div className="space-y-2">
+            <label className="flex items-center gap-2 text-sm font-medium text-foreground">
+              <FileText className="w-4 h-4 text-muted-foreground" />
               Notes
             </label>
             <textarea
-              className="w-full bg-neutral-100/50 rounded-md border-0 p-2 text-base font-hand outline-none focus:ring-1 focus:ring-primary/20 resize-none"
-              placeholder="Notes..."
+              className="w-full bg-background border border-border rounded-lg px-4 py-3 text-foreground outline-none focus:ring-2 focus:ring-accent/20 focus:border-accent transition-all placeholder:text-muted-foreground resize-none"
+              placeholder="Any additional notes..."
               rows={2}
               value={formData.notes}
               onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
+              data-testid="input-notes"
             />
           </div>
 
-          <div className="flex justify-end gap-3 pt-4">
+          {/* Actions */}
+          <div className="flex justify-end gap-3 pt-4 border-t border-border">
             <button
               type="button"
               onClick={() => onOpenChange(false)}
-              className="px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+              className="px-5 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg transition-colors"
+              data-testid="button-cancel"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isPending}
-              className="
-                inline-flex items-center gap-2 px-6 py-2 rounded-full 
-                bg-primary text-primary-foreground font-medium 
-                shadow-lg shadow-primary/20 
-                hover:shadow-xl hover:-translate-y-0.5 
-                active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed
-                transition-all duration-200
-              "
+              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              data-testid="button-save"
             >
               {isPending ? (
                 <>
@@ -220,7 +241,7 @@ export function AppointmentForm({
               ) : (
                 <>
                   <Save className="h-4 w-4" />
-                  Save Booking
+                  {existingAppointment ? "Update" : "Book"}
                 </>
               )}
             </button>
