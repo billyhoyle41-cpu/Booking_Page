@@ -62,6 +62,22 @@ export function AppointmentForm({
 
   const isPending = createMutation.isPending || updateMutation.isPending;
 
+  const formatPhoneNumber = (value: string) => {
+    if (!value) return value;
+    const phoneNumber = value.replace(/[^\d]/g, '');
+    const phoneNumberLength = phoneNumber.length;
+    if (phoneNumberLength < 4) return phoneNumber;
+    if (phoneNumberLength < 7) {
+      return `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(3)}`;
+    }
+    return `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(3, 6)}-${phoneNumber.slice(6, 10)}`;
+  };
+
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formattedPhoneNumber = formatPhoneNumber(e.target.value);
+    setFormData(prev => ({ ...prev, phoneNumber: formattedPhoneNumber }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -130,9 +146,10 @@ export function AppointmentForm({
               <input
                 type="tel"
                 className="w-full bg-transparent border-b-2 border-neutral-300 focus:border-primary px-1 py-1 text-lg font-hand outline-none transition-colors placeholder:text-neutral-300"
-                placeholder="Phone"
+                placeholder="(222) 222-2222"
                 value={formData.phoneNumber}
-                onChange={(e) => setFormData(prev => ({ ...prev, phoneNumber: e.target.value }))}
+                onChange={handlePhoneChange}
+                maxLength={14}
               />
             </div>
             <div className="space-y-1">
