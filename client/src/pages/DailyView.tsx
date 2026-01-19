@@ -184,18 +184,26 @@ export default function DailyView() {
                           className="flex items-center gap-3 cursor-pointer"
                           onClick={() => handleSlotClick(time, appointment)}
                         >
-                          <span className={cn(
-                            "text-xl md:text-2xl font-hand text-primary transition-all",
-                            appointment.isCompleted && "line-through decoration-stone-400 decoration-2"
-                          )}>
-                            {appointment.customerName}
-                          </span>
-                          
-                          {appointment.service && (
-                            <span className="hidden sm:inline-block text-xs uppercase tracking-wider text-stone-400 bg-stone-100 px-2 py-0.5 rounded-sm font-medium">
-                              {appointment.service}
+                          <div className="flex flex-col">
+                            <span className={cn(
+                              "text-xl md:text-2xl font-hand text-primary transition-all leading-tight",
+                              appointment.isCompleted && "line-through decoration-stone-400 decoration-2"
+                            )}>
+                              {appointment.customerName}
                             </span>
-                          )}
+                            <div className="flex items-center gap-2">
+                              {appointment.phoneNumber && (
+                                <span className="text-[10px] text-stone-400 font-mono">
+                                  {appointment.phoneNumber}
+                                </span>
+                              )}
+                              {appointment.service && (
+                                <span className="text-[10px] uppercase tracking-wider text-stone-400 font-medium">
+                                  • {appointment.service}
+                                </span>
+                              )}
+                            </div>
+                          </div>
                         </div>
 
                         {/* Actions */}

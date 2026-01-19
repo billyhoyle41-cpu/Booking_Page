@@ -32,6 +32,8 @@ export function AppointmentForm({
   
   const [formData, setFormData] = useState({
     customerName: "",
+    phoneNumber: "",
+    email: "",
     service: "",
     notes: "",
   });
@@ -41,12 +43,16 @@ export function AppointmentForm({
       if (existingAppointment) {
         setFormData({
           customerName: existingAppointment.customerName,
+          phoneNumber: (existingAppointment as any).phoneNumber || "",
+          email: (existingAppointment as any).email || "",
           service: existingAppointment.service || "",
           notes: existingAppointment.notes || "",
         });
       } else {
         setFormData({
           customerName: "",
+          phoneNumber: "",
+          email: "",
           service: "",
           notes: "",
         });
@@ -64,6 +70,8 @@ export function AppointmentForm({
         await updateMutation.mutateAsync({
           id: existingAppointment.id,
           customerName: formData.customerName,
+          phoneNumber: formData.phoneNumber || null,
+          email: formData.email || null,
           service: formData.service || null,
           notes: formData.notes || null,
         });
@@ -73,6 +81,8 @@ export function AppointmentForm({
           date,
           time,
           customerName: formData.customerName,
+          phoneNumber: formData.phoneNumber || null,
+          email: formData.email || null,
           service: formData.service || null,
           notes: formData.notes || null,
         });
@@ -97,41 +107,68 @@ export function AppointmentForm({
           </DialogTitle>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit} className="space-y-6 mt-4">
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+        <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
               Customer Name
             </label>
             <input
               required
               autoFocus
-              className="w-full bg-transparent border-b-2 border-neutral-300 focus:border-primary px-1 py-2 text-2xl font-hand outline-none transition-colors placeholder:text-neutral-300"
-              placeholder="e.g. John Doe"
+              className="w-full bg-transparent border-b-2 border-neutral-300 focus:border-primary px-1 py-1 text-2xl font-hand outline-none transition-colors placeholder:text-neutral-300"
+              placeholder="Name"
               value={formData.customerName}
               onChange={(e) => setFormData(prev => ({ ...prev, customerName: e.target.value }))}
             />
           </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                Phone Number
+              </label>
+              <input
+                type="tel"
+                className="w-full bg-transparent border-b-2 border-neutral-300 focus:border-primary px-1 py-1 text-lg font-hand outline-none transition-colors placeholder:text-neutral-300"
+                placeholder="Phone"
+                value={formData.phoneNumber}
+                onChange={(e) => setFormData(prev => ({ ...prev, phoneNumber: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                Email
+              </label>
+              <input
+                type="email"
+                className="w-full bg-transparent border-b-2 border-neutral-300 focus:border-primary px-1 py-1 text-lg font-hand outline-none transition-colors placeholder:text-neutral-300"
+                placeholder="Email"
+                value={formData.email}
+                onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
               Service
             </label>
             <input
-              className="w-full bg-transparent border-b-2 border-neutral-300 focus:border-primary px-1 py-2 text-lg font-hand outline-none transition-colors placeholder:text-neutral-300"
-              placeholder="e.g. Haircut & Shave"
+              className="w-full bg-transparent border-b-2 border-neutral-300 focus:border-primary px-1 py-1 text-lg font-hand outline-none transition-colors placeholder:text-neutral-300"
+              placeholder="Service"
               value={formData.service}
               onChange={(e) => setFormData(prev => ({ ...prev, service: e.target.value }))}
             />
           </div>
 
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
               Notes
             </label>
             <textarea
-              className="w-full bg-neutral-100/50 rounded-md border-0 p-3 text-base font-hand outline-none focus:ring-1 focus:ring-primary/20 resize-none"
-              placeholder="Any special instructions..."
-              rows={3}
+              className="w-full bg-neutral-100/50 rounded-md border-0 p-2 text-base font-hand outline-none focus:ring-1 focus:ring-primary/20 resize-none"
+              placeholder="Notes..."
+              rows={2}
               value={formData.notes}
               onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
             />

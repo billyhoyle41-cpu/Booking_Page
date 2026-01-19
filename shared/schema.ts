@@ -7,6 +7,8 @@ export const appointments = pgTable("appointments", {
   date: text("date").notNull(), // YYYY-MM-DD
   time: text("time").notNull(), // HH:mm
   customerName: text("customer_name").notNull(),
+  phoneNumber: text("phone_number"),
+  email: text("email"),
   service: text("service"),
   notes: text("notes"),
   isCompleted: boolean("is_completed").default(false),
@@ -20,8 +22,24 @@ export type InsertAppointment = z.infer<typeof insertAppointmentSchema>;
 export type CreateAppointmentRequest = InsertAppointment;
 export type UpdateAppointmentRequest = Partial<InsertAppointment>;
 
-export const TIME_SLOTS = [
-  "09:00", "09:30", "10:00", "10:30", "11:00", "11:30",
-  "12:00", "12:30", "13:00", "13:30", "14:00", "14:30",
-  "15:00", "15:30", "16:00", "16:30", "17:00"
-];
+// Generate 20 minute blocks from 9am to 5pm
+const generateTimeSlots = () => {
+  const slots = [];
+  let hour = 9;
+  let minute = 0;
+  
+  while (hour < 17 || (hour === 17 && minute === 0)) {
+    const h = hour.toString().padStart(2, '0');
+    const m = minute.toString().padStart(2, '0');
+    slots.push(`${h}:${m}`);
+    
+    minute += 20;
+    if (minute >= 60) {
+      hour += 1;
+      minute = 0;
+    }
+  }
+  return slots;
+};
+
+export const TIME_SLOTS = generateTimeSlots();
