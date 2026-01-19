@@ -23,6 +23,8 @@
   --ring: 357 75% 47%;
   --destructive: 0 65% 50%;
   --destructive-foreground: 0 0% 100%;
+  --popover: 0 0% 100%;                  /* white solid background */
+  --popover-foreground: 222 59% 23%;
   
   --radius: 0rem;                        /* Sharp corners per brand */
   
