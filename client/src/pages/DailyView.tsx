@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { format, addDays, subDays, isToday, parseISO } from "date-fns";
+import { format, addDays, subDays, isToday, parseISO, parse } from "date-fns";
 import { useAppointments, useDeleteAppointment, useUpdateAppointment, useSyncFromCalendar } from "@/hooks/use-appointments";
 import { AppointmentForm } from "@/components/AppointmentForm";
 import { TIME_SLOTS, type Appointment } from "@shared/schema";
@@ -53,6 +53,12 @@ export default function DailyView() {
   // Helper to find appointment for a slot
   const getAppointmentForSlot = (time: string) => {
     return appointments?.find(apt => apt.time === time);
+  };
+
+  // Format time as AM/PM
+  const formatTimeAmPm = (time: string) => {
+    const date = parse(time, 'HH:mm', new Date());
+    return format(date, 'h:mm a');
   };
 
   const handleSlotClick = (time: string, appointment?: Appointment) => {
@@ -180,7 +186,7 @@ export default function DailyView() {
                   {/* Time Column */}
                   <div className="w-[80px] md:w-[120px] flex-shrink-0 flex items-start justify-end pr-4 md:pr-6 pt-2">
                     <span className="font-mono text-sm text-stone-400 group-hover:text-stone-600 transition-colors">
-                      {time}
+                      {formatTimeAmPm(time)}
                     </span>
                   </div>
 

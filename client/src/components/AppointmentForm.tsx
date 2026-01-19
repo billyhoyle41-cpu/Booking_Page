@@ -4,6 +4,7 @@ import { useCreateAppointment, useUpdateAppointment } from "@/hooks/use-appointm
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Loader2, Save, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { format, parse } from "date-fns";
 
 interface AppointmentFormProps {
   open: boolean;
@@ -119,7 +120,7 @@ export function AppointmentForm({
       <DialogContent className="sm:max-w-[425px] bg-[#faf9f6] border-neutral-200 shadow-xl paper-shadow font-sans">
         <DialogHeader>
           <DialogTitle className="text-2xl font-hand text-primary">
-            {existingAppointment ? "Edit Appointment" : "New Booking"} • {time}
+            {existingAppointment ? "Edit Appointment" : "New Booking"} • {format(parse(time, 'HH:mm', new Date()), 'h:mm a')}
           </DialogTitle>
         </DialogHeader>
         
