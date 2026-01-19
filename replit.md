@@ -78,6 +78,7 @@ Single `appointments` table with fields:
   - Calendar → App: Manual sync button + 30-second auto-refresh polling
   - Appointments synced from calendar are identified by `googleEventId` for proper upsert/delete handling
 - **Event Format**: Events use "Barber: {customerName}" as title, with service/phone/email/notes in description
+- **GHL (GoHighLevel) Support**: Since GHL calendar syncs to Google Calendar, all GHL appointments automatically flow through to this app via the Google Calendar sync. The sync imports ALL events from the calendar (not just "Barber:" prefixed ones).
 
 ### Development vs Production
 - Development: Vite dev server with HMR, serves from source

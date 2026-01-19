@@ -224,12 +224,15 @@ export async function syncFromGoogleCalendar() {
         continue;
       }
       
-      // Only process events that look like barber appointments
-      if (!event.summary?.startsWith('Barber: ')) continue;
+      // Skip events without a title
+      if (!event.summary) continue;
       
       seenEventIds.add(event.id);
       
-      const customerName = event.summary.substring(8); // Remove "Barber: " prefix
+      // Extract customer name - remove "Barber: " prefix if present, otherwise use full title
+      const customerName = event.summary.startsWith('Barber: ') 
+        ? event.summary.substring(8) 
+        : event.summary;
       const startDateTime = event.start?.dateTime;
       
       if (!startDateTime || !customerName) continue;
