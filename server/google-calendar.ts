@@ -43,9 +43,6 @@ async function getAccessToken() {
   return accessToken;
 }
 
-// WARNING: Never cache this client.
-// Access tokens expire, so a new client must be created each time.
-// Always call this function again to get a fresh client.
 export async function getUncachableGoogleCalendarClient() {
   const accessToken = await getAccessToken();
 
@@ -57,10 +54,27 @@ export async function getUncachableGoogleCalendarClient() {
   return google.calendar({ version: 'v3', auth: oauth2Client });
 }
 
+async function getOrCreateBrendasCalendarId() {
+  const calendar = await getUncachableGoogleCalendarClient();
+  const list = await calendar.calendarList.list();
+  
+  const brendasCalendar = list.data.items?.find(c => c.summary === "Brenda's Calendar");
+  if (brendasCalendar) return brendasCalendar.id;
+
+  const newCalendar = await calendar.calendars.insert({
+    requestBody: {
+      summary: "Brenda's Calendar",
+      description: "Appointment Book Appointments"
+    }
+  });
+  return newCalendar.data.id;
+}
+
 export async function getSyncedCalendarInfo() {
   try {
     const calendar = await getUncachableGoogleCalendarClient();
-    const response = await calendar.calendars.get({ calendarId: 'primary' });
+    const calendarId = await getOrCreateBrendasCalendarId();
+    const response = await calendar.calendars.get({ calendarId: calendarId as string });
     return response.data.summary;
   } catch (error) {
     console.error('Error fetching calendar info:', error);
@@ -71,10 +85,10 @@ export async function getSyncedCalendarInfo() {
 export async function createCalendarEvent(appointment: any) {
   try {
     const calendar = await getUncachableGoogleCalendarClient();
+    const calendarId = await getOrCreateBrendasCalendarId();
     
-    // Appointment date is YYYY-MM-DD, time is HH:mm
     const startDateTime = new Date(`${appointment.date}T${appointment.time}:00`);
-    const endDateTime = new Date(startDateTime.getTime() + 20 * 60000); // 20 minutes
+    const endDateTime = new Date(startDateTime.getTime() + 20 * 60000);
 
     const event = {
       summary: `Barber: ${appointment.customerName}`,
@@ -88,7 +102,7 @@ export async function createCalendarEvent(appointment: any) {
     };
 
     const response = await calendar.events.insert({
-      calendarId: 'primary',
+      calendarId: calendarId as string,
       requestBody: event,
     });
 
