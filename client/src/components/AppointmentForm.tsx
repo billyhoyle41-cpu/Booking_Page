@@ -118,22 +118,6 @@ export function AppointmentForm({
 
   const formattedTime = format(parse(time, 'HH:mm', new Date()), 'h:mm a');
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const [viewportHeight, setViewportHeight] = useState<number | null>(null);
-
-  // Track visual viewport height for mobile keyboard handling
-  useEffect(() => {
-    if (typeof window !== 'undefined' && window.visualViewport) {
-      const updateHeight = () => {
-        setViewportHeight(window.visualViewport!.height);
-      };
-      
-      updateHeight();
-      window.visualViewport.addEventListener('resize', updateHeight);
-      return () => {
-        window.visualViewport?.removeEventListener('resize', updateHeight);
-      };
-    }
-  }, [open]);
 
   // Scroll focused input into view within the scroll container
   const handleInputFocus = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -158,16 +142,10 @@ export function AppointmentForm({
     }, 150);
   };
   
-  // Calculate max height based on visual viewport
-  const dialogMaxHeight = viewportHeight 
-    ? Math.min(viewportHeight * 0.85, 600) 
-    : undefined;
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent 
-        className="sm:max-w-[450px] bg-card border-border card-shadow rounded-none p-0 flex flex-col"
-        style={dialogMaxHeight ? { maxHeight: `${dialogMaxHeight}px` } : { maxHeight: '85vh' }}
+        className="sm:max-w-[450px] bg-card border-border card-shadow rounded-none p-0 flex flex-col w-full h-full max-h-full sm:h-auto sm:max-h-[85vh] fixed inset-0 sm:inset-auto sm:left-[50%] sm:top-[50%] sm:translate-x-[-50%] sm:translate-y-[-50%]"
       >
         <DialogHeader className="p-4 sm:p-6 pb-3 sm:pb-4 border-b border-border flex-shrink-0">
           <div className="flex items-center gap-3">
