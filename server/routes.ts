@@ -32,9 +32,13 @@ export async function registerRoutes(
   // Manual sync endpoint
   app.post("/api/calendar/sync", async (_req, res) => {
     try {
-      const synced = await syncFromGoogleCalendar();
-      res.json({ message: `Synced ${synced} appointments from Google Calendar` });
+      const result = await syncFromGoogleCalendar();
+      res.json({ 
+        message: `Synced from Google Calendar: ${result.synced} new, ${result.updated} updated, ${result.deleted} deleted`,
+        ...result
+      });
     } catch (err) {
+      console.error("Sync error:", err);
       res.status(500).json({ message: "Failed to sync from Google Calendar" });
     }
   });
