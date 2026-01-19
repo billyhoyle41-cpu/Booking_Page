@@ -23,6 +23,14 @@ export const api = {
         200: z.object({ summary: z.string().nullable() }),
       },
     },
+    deleteBrendasCalendar: {
+      method: 'POST' as const,
+      path: '/api/calendar/delete-brendas',
+      responses: {
+        200: z.object({ message: z.string() }),
+        404: z.object({ message: z.string() }),
+      },
+    },
     list: {
       method: 'GET' as const,
       path: '/api/appointments',
