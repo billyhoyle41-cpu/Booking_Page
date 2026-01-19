@@ -81,3 +81,18 @@ export async function createCalendarEvent(appointment: any) {
     return null;
   }
 }
+
+export async function listCalendars() {
+  try {
+    const calendar = await getUncachableGoogleCalendarClient();
+    const response = await calendar.calendarList.list();
+    return response.data.items?.map(item => ({
+      id: item.id,
+      summary: item.summary,
+      primary: item.primary || false
+    })) || [];
+  } catch (error) {
+    console.error('Error listing calendars:', error);
+    return [];
+  }
+}
