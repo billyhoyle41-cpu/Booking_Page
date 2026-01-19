@@ -5,6 +5,8 @@ import { api } from "@shared/routes";
 import { z } from "zod";
 import { TIME_SLOTS } from "@shared/schema";
 
+import { createCalendarEvent } from "./google-calendar";
+
 export async function registerRoutes(
   httpServer: Server,
   app: Express
@@ -47,6 +49,15 @@ export async function registerRoutes(
       }
 
       const appointment = await storage.createAppointment(input);
+      
+      // Sync to Google Calendar
+      try {
+        await createCalendarEvent(appointment);
+      } catch (err) {
+        console.error("Failed to sync to Google Calendar:", err);
+        // We don't fail the request if calendar sync fails
+      }
+
       res.status(201).json(appointment);
     } catch (err) {
       if (err instanceof z.ZodError) {
