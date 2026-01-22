@@ -6,6 +6,7 @@ import { z } from "zod";
 import { TIME_SLOTS } from "@shared/schema";
 
 import { createCalendarEvent, updateCalendarEvent, deleteCalendarEvent, getSyncedCalendarInfo, setupCalendarWatch, handleCalendarWebhook, syncFromGoogleCalendar } from "./google-calendar";
+import { syncGHLAppointmentsForDate, getGHLCalendarInfo } from "./ghl-calendar";
 
 export async function registerRoutes(
   httpServer: Server,
@@ -69,6 +70,34 @@ export async function registerRoutes(
       res.json({ summary });
     } catch (err) {
       res.status(500).json({ message: "Failed to fetch calendar info" });
+    }
+  });
+
+  // GHL Calendar sync endpoint
+  app.post("/api/ghl/sync", async (req, res) => {
+    try {
+      const date = req.body.date as string;
+      if (!date) {
+        return res.status(400).json({ message: "Date is required" });
+      }
+      const result = await syncGHLAppointmentsForDate(date);
+      res.json({ 
+        message: `Synced ${result.synced} appointments from GHL`,
+        ...result
+      });
+    } catch (err) {
+      console.error("GHL sync error:", err);
+      res.status(500).json({ message: "Failed to sync from GHL Calendar" });
+    }
+  });
+
+  // GHL Calendar info endpoint
+  app.get("/api/ghl/info", async (_req, res) => {
+    try {
+      const info = await getGHLCalendarInfo();
+      res.json(info);
+    } catch (err) {
+      res.status(500).json({ message: "Failed to fetch GHL calendar info" });
     }
   });
 

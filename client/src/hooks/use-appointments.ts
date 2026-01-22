@@ -132,3 +132,26 @@ export function useSyncFromCalendar() {
     },
   });
 }
+
+// POST /api/ghl/sync - Manual sync from GHL Calendar
+export function useSyncFromGHL() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (date: string) => {
+      const res = await fetch('/api/ghl/sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ date }),
+        credentials: "include",
+      });
+      if (!res.ok) throw new Error('Failed to sync from GHL');
+      return res.json();
+    },
+    onSuccess: () => {
+      // Invalidate all appointment queries to refresh data
+      queryClient.invalidateQueries({ 
+        queryKey: [api.appointments.list.path] 
+      });
+    },
+  });
+}

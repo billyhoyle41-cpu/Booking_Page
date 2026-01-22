@@ -1,0 +1,186 @@
+import { storage } from './storage';
+import { formatInTimeZone, toZonedTime } from 'date-fns-tz';
+import { startOfDay, endOfDay, parseISO, addMinutes } from 'date-fns';
+
+const TIMEZONE = 'America/Detroit';
+const GHL_API_BASE = 'https://services.leadconnectorhq.com';
+
+interface GHLAppointment {
+  id: string;
+  title?: string;
+  calendarId: string;
+  contactId?: string;
+  startTime: string;
+  endTime: string;
+  status: string;
+  appointmentStatus?: string;
+  notes?: string;
+  contact?: {
+    id: string;
+    name?: string;
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+    phone?: string;
+  };
+}
+
+interface GHLCalendar {
+  id: string;
+  name: string;
+  description?: string;
+  locationId: string;
+}
+
+function getGHLHeaders() {
+  const apiKey = process.env.GHL_API_KEY;
+  if (!apiKey) {
+    throw new Error('GHL_API_KEY not configured');
+  }
+  
+  return {
+    'Authorization': `Bearer ${apiKey}`,
+    'Content-Type': 'application/json',
+    'Version': '2021-07-28'
+  };
+}
+
+function getLocationId() {
+  const locationId = process.env.GHL_LOCATION_ID;
+  if (!locationId) {
+    throw new Error('GHL_LOCATION_ID not configured');
+  }
+  return locationId;
+}
+
+export async function getGHLCalendars(): Promise<GHLCalendar[]> {
+  const locationId = getLocationId();
+  const headers = getGHLHeaders();
+  
+  try {
+    const response = await fetch(
+      `${GHL_API_BASE}/calendars/?locationId=${locationId}`,
+      { headers }
+    );
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('GHL API error fetching calendars:', response.status, errorText);
+      throw new Error(`GHL API error: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    return data.calendars || [];
+  } catch (error) {
+    console.error('Error fetching GHL calendars:', error);
+    throw error;
+  }
+}
+
+export async function getGHLAppointmentsForDate(date: string, calendarId?: string): Promise<GHLAppointment[]> {
+  const locationId = getLocationId();
+  const headers = getGHLHeaders();
+  
+  const startDate = `${date}T00:00:00`;
+  const endDate = `${date}T23:59:59`;
+  
+  try {
+    let url = `${GHL_API_BASE}/calendars/events?locationId=${locationId}&startTime=${encodeURIComponent(startDate)}&endTime=${encodeURIComponent(endDate)}`;
+    
+    if (calendarId) {
+      url += `&calendarId=${calendarId}`;
+    }
+    
+    const response = await fetch(url, { headers });
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('GHL API error fetching appointments:', response.status, errorText);
+      throw new Error(`GHL API error: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    return data.events || [];
+  } catch (error) {
+    console.error('Error fetching GHL appointments:', error);
+    throw error;
+  }
+}
+
+export async function syncGHLAppointmentsForDate(date: string): Promise<{ synced: number; errors: number }> {
+  let synced = 0;
+  let errors = 0;
+  
+  try {
+    const ghlAppointments = await getGHLAppointmentsForDate(date);
+    console.log(`Found ${ghlAppointments.length} GHL appointments for ${date}`);
+    
+    for (const ghlAppt of ghlAppointments) {
+      try {
+        const startTime = parseISO(ghlAppt.startTime);
+        const zonedTime = toZonedTime(startTime, TIMEZONE);
+        const time = formatInTimeZone(startTime, TIMEZONE, 'HH:mm');
+        const apptDate = formatInTimeZone(startTime, TIMEZONE, 'yyyy-MM-dd');
+        
+        if (apptDate !== date) {
+          continue;
+        }
+        
+        const customerName = ghlAppt.contact?.name || 
+          (ghlAppt.contact?.firstName && ghlAppt.contact?.lastName 
+            ? `${ghlAppt.contact.firstName} ${ghlAppt.contact.lastName}` 
+            : ghlAppt.title || 'GHL Appointment');
+        
+        const existingAppointments = await storage.getAppointments(date);
+        const existingByGoogleEventId = existingAppointments.find((a: any) => a.googleEventId === `ghl_${ghlAppt.id}`);
+        const existingByTimeAndName = existingAppointments.find((a: any) => 
+          a.time === time && 
+          a.customerName.toLowerCase() === customerName.toLowerCase()
+        );
+        
+        if (existingByGoogleEventId) {
+          await storage.updateAppointment(existingByGoogleEventId.id, {
+            customerName,
+            phoneNumber: ghlAppt.contact?.phone || existingByGoogleEventId.phoneNumber,
+            email: ghlAppt.contact?.email || existingByGoogleEventId.email,
+            notes: ghlAppt.notes || existingByGoogleEventId.notes,
+          });
+          synced++;
+        } else if (!existingByTimeAndName) {
+          await storage.createAppointment({
+            date: apptDate,
+            time,
+            customerName,
+            phoneNumber: ghlAppt.contact?.phone || '',
+            email: ghlAppt.contact?.email || '',
+            service: '',
+            notes: ghlAppt.notes || '',
+            googleEventId: `ghl_${ghlAppt.id}`,
+          });
+          synced++;
+        }
+      } catch (apptError) {
+        console.error('Error processing GHL appointment:', apptError);
+        errors++;
+      }
+    }
+    
+    return { synced, errors };
+  } catch (error) {
+    console.error('Error syncing GHL appointments:', error);
+    throw error;
+  }
+}
+
+export async function getGHLCalendarInfo(): Promise<{ name: string; calendars: GHLCalendar[] } | null> {
+  try {
+    const calendars = await getGHLCalendars();
+    return {
+      name: 'GoHighLevel',
+      calendars
+    };
+  } catch (error) {
+    console.error('Error fetching GHL calendar info:', error);
+    return null;
+  }
+}
