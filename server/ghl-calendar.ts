@@ -1,9 +1,14 @@
 import { storage } from './storage';
-import { formatInTimeZone, toZonedTime } from 'date-fns-tz';
-import { startOfDay, endOfDay, parseISO, addMinutes } from 'date-fns';
+import { formatInTimeZone, toZonedTime, fromZonedTime } from 'date-fns-tz';
+import { startOfDay, endOfDay, parseISO, addMinutes, parse } from 'date-fns';
 
 const TIMEZONE = 'America/Detroit';
 const GHL_API_BASE = 'https://services.leadconnectorhq.com';
+
+// Get GHL Calendar ID from environment or use default (Brenda's Appointments)
+function getGHLCalendarId(): string {
+  return process.env.GHL_CALENDAR_ID || 'qyfrHvgNL27l6DS0tPsd';
+}
 
 interface GHLAppointment {
   id: string;
@@ -81,29 +86,36 @@ export async function getGHLAppointmentsForDate(date: string, calendarId?: strin
   const locationId = getLocationId();
   const headers = getGHLHeaders();
   
-  // Convert date to start and end of day in milliseconds
-  const dateObj = parseISO(date);
-  const startOfDayMs = startOfDay(dateObj).getTime();
-  const endOfDayMs = endOfDay(dateObj).getTime();
+  // Parse date and compute start/end of day in America/Detroit timezone
+  // Then convert to UTC milliseconds for the API
+  const localDate = parse(date, 'yyyy-MM-dd', new Date());
+  const startOfDayLocal = startOfDay(localDate);
+  const endOfDayLocal = endOfDay(localDate);
+  
+  // Convert from Detroit time to UTC for API call
+  const startOfDayUTC = fromZonedTime(startOfDayLocal, TIMEZONE);
+  const endOfDayUTC = fromZonedTime(endOfDayLocal, TIMEZONE);
+  
+  const startOfDayMs = startOfDayUTC.getTime();
+  const endOfDayMs = endOfDayUTC.getTime();
+  
+  // Use provided calendarId or get from environment
+  const targetCalendarId = calendarId || getGHLCalendarId();
   
   try {
-    let url = `${GHL_API_BASE}/calendars/events?locationId=${locationId}&startTime=${startOfDayMs}&endTime=${endOfDayMs}`;
+    const url = `${GHL_API_BASE}/calendars/events?locationId=${locationId}&calendarId=${targetCalendarId}&startTime=${startOfDayMs}&endTime=${endOfDayMs}`;
     
-    if (calendarId) {
-      url += `&calendarId=${calendarId}`;
-    }
-    
-    console.log('GHL API Request URL:', url);
+    console.log('GHL API: Fetching events for', date, 'calendar:', targetCalendarId);
     const response = await fetch(url, { headers });
     
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error('GHL API error fetching appointments:', response.status, errorText);
-      throw new Error(`GHL API error: ${response.status}`);
+      const errorData = await response.json().catch(() => ({}));
+      console.error('GHL API error:', response.status, errorData.message || 'Unknown error');
+      throw new Error(`GHL API error: ${response.status} - ${errorData.message || 'Unknown error'}`);
     }
     
     const data = await response.json();
-    console.log('GHL API Response:', JSON.stringify(data, null, 2));
+    console.log('GHL API: Found', data.events?.length || 0, 'events');
     return data.events || [];
   } catch (error) {
     console.error('Error fetching GHL appointments:', error);
@@ -111,12 +123,13 @@ export async function getGHLAppointmentsForDate(date: string, calendarId?: strin
   }
 }
 
-export async function syncGHLAppointmentsForDate(date: string): Promise<{ synced: number; errors: number }> {
+export async function syncGHLAppointmentsForDate(date: string, calendarId?: string): Promise<{ synced: number; errors: number }> {
   let synced = 0;
   let errors = 0;
   
   try {
-    const ghlAppointments = await getGHLAppointmentsForDate(date);
+    // calendarId is optional - getGHLAppointmentsForDate will use environment default
+    const ghlAppointments = await getGHLAppointmentsForDate(date, calendarId);
     console.log(`Found ${ghlAppointments.length} GHL appointments for ${date}`);
     
     for (const ghlAppt of ghlAppointments) {

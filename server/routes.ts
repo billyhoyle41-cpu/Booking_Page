@@ -74,12 +74,17 @@ export async function registerRoutes(
   });
 
   // GHL Calendar sync endpoint
+  const ghlSyncSchema = z.object({
+    date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format")
+  });
+
   app.post("/api/ghl/sync", async (req, res) => {
     try {
-      const date = req.body.date as string;
-      if (!date) {
-        return res.status(400).json({ message: "Date is required" });
+      const parsed = ghlSyncSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ message: parsed.error.errors[0].message });
       }
+      const { date } = parsed.data;
       const result = await syncGHLAppointmentsForDate(date);
       res.json({ 
         message: `Synced ${result.synced} appointments from GHL`,

@@ -69,6 +69,8 @@ Single `appointments` table with fields:
 - `POST /api/calendar/sync` - Sync appointments from Google Calendar
 - `POST /api/calendar/webhook` - Webhook for Google Calendar push notifications
 - `GET /api/calendar/info` - Get synced calendar info
+- `POST /api/ghl/sync` - Sync appointments from GoHighLevel calendar (body: {date: 'YYYY-MM-DD'})
+- `GET /api/ghl/info` - Get GHL calendar info
 
 ### Google Calendar Integration
 - **Calendar ID**: `de43e8a726b5cbbd1c985cc89093f02ac1df504f0896b55b8bba74610b259d4e@group.calendar.google.com`
@@ -78,7 +80,15 @@ Single `appointments` table with fields:
   - Calendar → App: Manual sync button + 30-second auto-refresh polling
   - Appointments synced from calendar are identified by `googleEventId` for proper upsert/delete handling
 - **Event Format**: Events use "Barber: {customerName}" as title, with service/phone/email/notes in description
-- **GHL (GoHighLevel) Support**: Since GHL calendar syncs to Google Calendar, all GHL appointments automatically flow through to this app via the Google Calendar sync. The sync imports ALL events from the calendar (not just "Barber:" prefixed ones).
+
+### GoHighLevel (GHL) Calendar Integration
+- **API Version**: 2021-04-15 via services.leadconnectorhq.com
+- **Authentication**: Private Integration Token (GHL_API_KEY environment variable)
+- **Location ID**: GHL_LOCATION_ID environment variable
+- **Default Calendar**: Brenda's Appointments (qyfrHvgNL27l6DS0tPsd), configurable via GHL_CALENDAR_ID env var
+- **Sync Direction**: GHL → App only (pull appointments from GHL into the appointment book)
+- **Required Scopes**: calendars.readonly, calendars/events.readonly
+- **Timezone**: America/Detroit (timestamps converted properly for API calls)
 
 ### Development vs Production
 - Development: Vite dev server with HMR, serves from source
