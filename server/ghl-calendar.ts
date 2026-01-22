@@ -41,7 +41,7 @@ function getGHLHeaders() {
   return {
     'Authorization': `Bearer ${apiKey}`,
     'Content-Type': 'application/json',
-    'Version': '2021-07-28'
+    'Version': '2021-04-15'
   };
 }
 
@@ -81,16 +81,19 @@ export async function getGHLAppointmentsForDate(date: string, calendarId?: strin
   const locationId = getLocationId();
   const headers = getGHLHeaders();
   
-  const startDate = `${date}T00:00:00`;
-  const endDate = `${date}T23:59:59`;
+  // Convert date to start and end of day in milliseconds
+  const dateObj = parseISO(date);
+  const startOfDayMs = startOfDay(dateObj).getTime();
+  const endOfDayMs = endOfDay(dateObj).getTime();
   
   try {
-    let url = `${GHL_API_BASE}/calendars/events?locationId=${locationId}&startTime=${encodeURIComponent(startDate)}&endTime=${encodeURIComponent(endDate)}`;
+    let url = `${GHL_API_BASE}/calendars/events?locationId=${locationId}&startTime=${startOfDayMs}&endTime=${endOfDayMs}`;
     
     if (calendarId) {
       url += `&calendarId=${calendarId}`;
     }
     
+    console.log('GHL API Request URL:', url);
     const response = await fetch(url, { headers });
     
     if (!response.ok) {
@@ -100,6 +103,7 @@ export async function getGHLAppointmentsForDate(date: string, calendarId?: strin
     }
     
     const data = await response.json();
+    console.log('GHL API Response:', JSON.stringify(data, null, 2));
     return data.events || [];
   } catch (error) {
     console.error('Error fetching GHL appointments:', error);
