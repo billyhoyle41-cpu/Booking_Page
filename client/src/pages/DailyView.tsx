@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { format, addDays, subDays, isToday, parseISO, parse } from "date-fns";
 import { useAppointments, useDeleteAppointment, useUpdateAppointment, useSyncFromCalendar, useSyncFromGHL } from "@/hooks/use-appointments";
 import { AppointmentForm } from "@/components/AppointmentForm";
 import { TIME_SLOTS, type Appointment } from "@shared/schema";
-import { useLocation } from "wouter";
+import { useLocation, useSearch } from "wouter";
 import { 
   Calendar as CalendarIcon, 
   ChevronLeft, 
@@ -37,6 +37,7 @@ import { AnimatePresence, motion } from "framer-motion";
 
 export default function DailyView() {
   const [, navigate] = useLocation();
+  const searchString = useSearch();
   const [currentDate, setCurrentDate] = useState(new Date());
   
   // Navigation handlers
@@ -44,18 +45,38 @@ export default function DailyView() {
   const handleNextDay = () => setCurrentDate(d => addDays(d, 1));
   const handleToday = () => setCurrentDate(new Date());
 
+  // Mutations (declared early so we can use in useEffect)
+  const deleteMutation = useDeleteAppointment();
+  const updateMutation = useUpdateAppointment();
+  const syncMutation = useSyncFromCalendar();
+  const ghlSyncMutation = useSyncFromGHL();
+
+  // Check for sync parameter from booking page
+  useEffect(() => {
+    const params = new URLSearchParams(searchString);
+    const syncDate = params.get("syncDate");
+    
+    if (syncDate) {
+      // Navigate to the synced date
+      const date = parseISO(syncDate);
+      if (!isNaN(date.getTime())) {
+        setCurrentDate(date);
+      }
+      
+      // Trigger GHL sync for that date
+      ghlSyncMutation.mutate(syncDate);
+      
+      // Clear the URL parameter
+      navigate("/", { replace: true });
+    }
+  }, [searchString]);
+
   // Data fetching
   const { data: appointments, isLoading, error } = useAppointments(currentDate);
 
   // Form state
   const [selectedSlot, setSelectedSlot] = useState<{ time: string, appointment?: Appointment } | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
-
-  // Mutations
-  const deleteMutation = useDeleteAppointment();
-  const updateMutation = useUpdateAppointment();
-  const syncMutation = useSyncFromCalendar();
-  const ghlSyncMutation = useSyncFromGHL();
 
   // Helper to find appointment for a slot
   const getAppointmentForSlot = (time: string) => {

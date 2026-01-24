@@ -1,16 +1,22 @@
 import { useEffect, useState } from "react";
-import { useSearch } from "wouter";
+import { useSearch, useLocation } from "wouter";
 import { format, parse } from "date-fns";
 import { ArrowLeft, Clock, Calendar as CalendarIcon, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Link } from "wouter";
 
 export default function BookingPage() {
+  const [, navigate] = useLocation();
   const searchString = useSearch();
   const params = new URLSearchParams(searchString);
   
   const preselectDate = params.get("date") || "";
   const preselectTime = params.get("time") || "";
+
+  // Navigate back and trigger GHL sync
+  const handleBack = () => {
+    // Pass the date and sync flag so the main page knows to sync
+    navigate(`/?syncDate=${preselectDate}`);
+  };
   
   const [iframeLoaded, setIframeLoaded] = useState(false);
   const [autoSelectAttempted, setAutoSelectAttempted] = useState(false);
@@ -59,11 +65,15 @@ export default function BookingPage() {
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
       <header className="bg-accent text-accent-foreground p-4 flex items-center gap-4">
-        <Link href="/">
-          <Button variant="ghost" size="icon" className="text-accent-foreground" data-testid="button-back">
-            <ArrowLeft className="h-5 w-5" />
-          </Button>
-        </Link>
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="text-accent-foreground" 
+          onClick={handleBack}
+          data-testid="button-back"
+        >
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
         <h1 className="text-xl font-bold uppercase tracking-wide font-heading">
           Book Appointment
         </h1>
