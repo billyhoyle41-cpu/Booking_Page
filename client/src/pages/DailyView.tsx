@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { format, addDays, subDays, isToday, parseISO, parse } from "date-fns";
-import { useAppointments, useDeleteAppointment, useUpdateAppointment, useSyncFromCalendar, useSyncFromGHL } from "@/hooks/use-appointments";
+import { useAppointments, useDeleteAppointment, useUpdateAppointment, useSyncFromGHL } from "@/hooks/use-appointments";
 import { AppointmentForm } from "@/components/AppointmentForm";
 import { TIME_SLOTS, type Appointment } from "@shared/schema";
 import { useLocation, useSearch } from "wouter";
@@ -26,7 +26,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@/components/ui/dropdown-menu"; // Keep for appointment actions menu
 import {
   Popover,
   PopoverContent,
@@ -48,7 +48,6 @@ export default function DailyView() {
   // Mutations (declared early so we can use in useEffect)
   const deleteMutation = useDeleteAppointment();
   const updateMutation = useUpdateAppointment();
-  const syncMutation = useSyncFromCalendar();
   const ghlSyncMutation = useSyncFromGHL();
 
   // Check for sync parameter from booking page
@@ -139,37 +138,16 @@ export default function DailyView() {
               <span className="text-sm text-white/70 font-display uppercase tracking-wide">Appointment Book</span>
             </div>
             
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button
-                  disabled={syncMutation.isPending || ghlSyncMutation.isPending}
-                  className="flex items-center gap-2 px-3 py-2 text-sm text-white/80 transition-colors hover-elevate"
-                  title="Sync Calendars"
-                  data-testid="button-sync-calendar"
-                >
-                  <RefreshCw className={cn("w-4 h-4", (syncMutation.isPending || ghlSyncMutation.isPending) && "animate-spin")} />
-                  <span className="hidden sm:inline">Sync</span>
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuItem 
-                  onClick={() => syncMutation.mutate()}
-                  disabled={syncMutation.isPending}
-                  data-testid="button-sync-google"
-                >
-                  <RefreshCw className={cn("w-4 h-4 mr-2", syncMutation.isPending && "animate-spin")} />
-                  Google Calendar
-                </DropdownMenuItem>
-                <DropdownMenuItem 
-                  onClick={() => ghlSyncMutation.mutate(format(currentDate, 'yyyy-MM-dd'))}
-                  disabled={ghlSyncMutation.isPending}
-                  data-testid="button-sync-ghl"
-                >
-                  <RefreshCw className={cn("w-4 h-4 mr-2", ghlSyncMutation.isPending && "animate-spin")} />
-                  GHL Calendar
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <button
+              onClick={() => ghlSyncMutation.mutate(format(currentDate, 'yyyy-MM-dd'))}
+              disabled={ghlSyncMutation.isPending}
+              className="flex items-center gap-2 px-3 py-2 text-sm text-white/80 transition-colors hover-elevate"
+              title="Sync with GHL"
+              data-testid="button-sync-ghl"
+            >
+              <RefreshCw className={cn("w-4 h-4", ghlSyncMutation.isPending && "animate-spin")} />
+              <span className="hidden sm:inline">Sync</span>
+            </button>
           </div>
         </div>
       </header>
