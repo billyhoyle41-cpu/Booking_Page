@@ -66,9 +66,18 @@ export default function DailyView() {
     return format(date, 'h:mm a');
   };
 
+  // GHL Booking widget URL
+  const GHL_BOOKING_URL = "https://app.briancrossley.com/widget/bookings/brendas-appointments";
+
   const handleSlotClick = (time: string, appointment?: Appointment) => {
-    setSelectedSlot({ time, appointment });
-    setIsFormOpen(true);
+    if (appointment) {
+      // Edit existing appointment
+      setSelectedSlot({ time, appointment });
+      setIsFormOpen(true);
+    } else {
+      // Open GHL booking page for new appointments
+      window.open(GHL_BOOKING_URL, '_blank');
+    }
   };
 
   const handleStatusToggle = async (appointment: Appointment) => {
