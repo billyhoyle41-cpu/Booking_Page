@@ -1,0 +1,46 @@
+You are building an appointment booking UX that launches a GoHighLevel (GHL) booking page after a user clicks a specific time slot (example: “Today at 2:00 PM”) from our app’s appointments grid.
+
+GOAL
+When the user clicks a slot in our app, the GHL booking page should open already positioned on that same date AND automatically select that exact time slot (so the user does NOT have to click the same time a second time).
+
+INPUTS FROM OUR APP
+- calendarBookingUrl: the public GHL booking link (or one-time booking link)
+- clickedStartDateTimeLocal: the exact slot the user clicked, in the user’s local timezone (America/Detroit)
+  Example: 2026-01-24T14:00:00-05:00
+- clickedDurationMinutes (optional): meeting length if needed
+
+REQUIREMENTS
+1) When launching the booking page, append our own parameters to the booking URL so the page can read them:
+   - preselectDate=YYYY-MM-DD
+   - preselectTime=HH:MM (24-hour)
+   - preselectTz=America/Detroit
+   Example final URL:
+   {calendarBookingUrl}?preselectDate=2026-01-24&preselectTime=14:00&preselectTz=America/Detroit
+
+2) On booking page load, auto-navigate to the requested date and auto-select the requested time slot:
+   - Wait until the available time slots are rendered (use a MutationObserver or polling with a timeout).
+   - Confirm the date displayed matches preselectDate. If not, click the calendar next/prev controls or date picker to reach preselectDate.
+   - Find the time slot button/link whose visible text matches the requested time (e.g., “2:00 PM”) OR whose underlying data attribute matches “14:00”.
+   - Trigger a click on that time slot element.
+   - If the booking UI requires a second “confirm” click, also auto-click the next/continue button.
+
+3) Fail gracefully:
+   - If the slot isn’t available, do NOT select a different time.
+   - Instead, show a message: “That time is no longer available—please pick another slot,” and keep the booking page open on that date.
+
+4) Security + reliability:
+   - Do not store PHI or sensitive info in the URL.
+   - Use a max wait time (e.g., 8–12 seconds) for slot rendering.
+   - Log a debug event if the auto-select fails (missing DOM target, date mismatch, slot not found).
+
+IMPLEMENTATION OPTIONS (choose best for our stack)
+A) Best: Embed the GHL calendar widget inside our own page (iframe or native embed) and run the auto-select script in the same page context.
+B) If we must open the hosted GHL booking page directly:
+   - Use a wrapper page we control (ourdomain.com/book) that receives preselectDate/time, then loads the GHL booking widget/embed inside it, where we CAN run JS to auto-select the slot.
+   - If we can’t embed due to restrictions, then we cannot reliably run DOM automation on the hosted page.
+
+DELIVERABLE
+Provide the recommended implementation approach for our app, including:
+- How to generate the final booking URL with preselect params
+- The page-load auto-select logic (MutationObserver/polling)
+- A clear fallback behavior when the slot is not available

@@ -3,6 +3,7 @@ import { format, addDays, subDays, isToday, parseISO, parse } from "date-fns";
 import { useAppointments, useDeleteAppointment, useUpdateAppointment, useSyncFromCalendar, useSyncFromGHL } from "@/hooks/use-appointments";
 import { AppointmentForm } from "@/components/AppointmentForm";
 import { TIME_SLOTS, type Appointment } from "@shared/schema";
+import { useLocation } from "wouter";
 import { 
   Calendar as CalendarIcon, 
   ChevronLeft, 
@@ -35,6 +36,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { AnimatePresence, motion } from "framer-motion";
 
 export default function DailyView() {
+  const [, navigate] = useLocation();
   const [currentDate, setCurrentDate] = useState(new Date());
   
   // Navigation handlers
@@ -66,17 +68,15 @@ export default function DailyView() {
     return format(date, 'h:mm a');
   };
 
-  // GHL Booking widget URL
-  const GHL_BOOKING_URL = "https://app.briancrossley.com/widget/bookings/brendas-appointments";
-
   const handleSlotClick = (time: string, appointment?: Appointment) => {
     if (appointment) {
       // Edit existing appointment
       setSelectedSlot({ time, appointment });
       setIsFormOpen(true);
     } else {
-      // Open GHL booking page for new appointments
-      window.open(GHL_BOOKING_URL, '_blank');
+      // Navigate to booking page with date and time pre-selected
+      const dateParam = format(currentDate, "yyyy-MM-dd");
+      navigate(`/book?date=${dateParam}&time=${time}`);
     }
   };
 
