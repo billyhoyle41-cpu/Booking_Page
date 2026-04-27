@@ -18,7 +18,6 @@ run = ["node", "./dist/index.cjs"]
 build = ["npm", "run", "build"]
 
 [workflows]
-runButton = "Project"
 
 [[workflows.workflow]]
 name = "Project"
@@ -35,8 +34,7 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "npm run dev"
-waitForPort = 5000
+args = "npm run devgit remote add origin https://github.com/billyhoyle41-cpu/Booking_Page.git git branch -M main git add . git commit -m \"initial upload\" git push -u origin main"
 
 [agent]
 integrations = ["google-calendar:1.0.0"]
