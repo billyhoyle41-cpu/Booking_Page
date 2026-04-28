@@ -126,7 +126,7 @@ export default function DailyView() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-orange-500 text-white sticky top-0 z-20">
+      <header className="bg-accent text-accent-foreground sticky top-0 z-20">
         <div className="max-w-4xl mx-auto px-4 py-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-center gap-3">
